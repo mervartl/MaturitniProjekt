@@ -10,7 +10,7 @@ import styles from '../styles/Home.module.css'
 
 const darkTheme = createTheme({
   palette: {
-    mode: 'light',
+    mode: 'dark',
   },
 });
 
