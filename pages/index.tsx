@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
-import { LogReg } from '../components/LogReg'
+import { Sidebar } from '../components/Sidebar'
 import styles from '../styles/Home.module.css'
 import { InputCrypto } from '../components/InputCrypto';
 
@@ -37,7 +37,7 @@ const Home: NextPage = () => {
           </Grid>
           <Grid container columns={12} spacing={2}>
             <Grid container columns={12} spacing={2}>
-              <Grid item xs={2.5} textAlign="center" marginTop="2%" backgroundColor="#282828"><LogReg /></Grid>
+              <Grid item xs={2.5} textAlign="center" marginTop="2%" backgroundColor="#282828"><Sidebar /></Grid>
               <Grid item xs={9.5} textAlign="center" padding="100% 0%" marginTop="2%" backgroundColor="#202020"><InputCrypto/></Grid>
             </Grid>
           </Grid>
