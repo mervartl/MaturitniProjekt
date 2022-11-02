@@ -7,9 +7,29 @@ import { Typography } from "@mui/material";
 
 export const InputCrypto: React.FC = () => {
 
+    type DBCryptos = {
+        map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
+        forEach(arg0: (crypto: any) => void): unknown;
+        id: string;
+        symbol: string;
+        name: string;
+        img: string;
+        value: number;
+        userId: string;
+      };
+
+      type DataCryptos = {
+        forEach(arg0: (dat: any) => void): unknown;
+        id: string;
+        symbol: string;
+        name: string;
+        image: string;
+        current_price: number;
+      };
+
     const { user } = useUserContext();
-    const [cryptos, setCryptos] = useState([]);
-    const [data, setData] = useState([]);
+    const [cryptos, setCryptos] = useState<DBCryptos>([]);
+    const [data, setData] = useState<DataCryptos>([]);
 
     const url =
         'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';

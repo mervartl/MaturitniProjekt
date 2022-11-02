@@ -1,5 +1,5 @@
-import { Autocomplete, AutocompleteRenderInputParams, Button, TextField, Typography, } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { Autocomplete,  Button, TextField, Typography, } from "@mui/material";
+import { useState } from "react";
 import { useUserContext } from "./userContext";
 
 export const Sidebar: React.FC = () => {
@@ -10,13 +10,11 @@ export const Sidebar: React.FC = () => {
   const [logorreg, setLogorreg] = useState<string>();
 
   const top100Films = () => [
-    { label: 'The Shawshank Redemption', year: 1994 },
-    { label: 'The Godfather', year: 1972 },
-    { label: 'The Godfather: Part II', year: 1974 },
-    { label: 'The Dark Knight', year: 2008 }
+    { label: 'Bitcoin' },
+    { label: 'Ethereum' },
+    { label: 'Tether' },
+    { label: 'BNB' }
   ];
-
-
 
   const div = (
     <div>
