@@ -1,20 +1,55 @@
-import { Autocomplete,  Button, TextField, Typography, } from "@mui/material";
-import { useState } from "react";
+import { Autocomplete, Button, Stack, TextField, Typography, } from "@mui/material";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useUserContext } from "./userContext";
 
 export const Sidebar: React.FC = () => {
+
+  const [data, setData] = useState<DataCryptos>([]);
+  const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
+
+  const url =
+    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
+
+
+  
+
+  useEffect(() => {
+    axios.get(url).then((response) => {
+      setData(response.data);
+    });
+  }, [url]);
+  useEffect(() => { //vykonana ve vicekrat
+    data.map(dat => {
+      listItems.push(dat.name);
+    });
+  }, [data])
+
+  type Listt = {
+    name: string;
+  };
+
+  type DataCryptos = {
+    forEach(arg0: (dat: any) => void): unknown; //data z api
+    symbol: string;
+    name: string;
+  };
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const { user, login, createUser, logout } = useUserContext();
   const [logorreg, setLogorreg] = useState<string>();
+  const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
+  const [cryptoValue, setCryptoValue] = useState('');
+  const [dateValue, setDateValue] = useState('');
 
-  const top100Films = () => [
-    { label: 'Bitcoin' },
-    { label: 'Ethereum' },
-    { label: 'Tether' },
-    { label: 'BNB' }
-  ];
+  const clickHandler = () => {
+    const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoValue}/history?date=${dateValue}`;
+
+    console.log(urlDate);
+  };
+
+
 
   const div = (
     <div>
@@ -115,31 +150,40 @@ export const Sidebar: React.FC = () => {
           {() => setLogorreg('')}
         </div>
         <br /><br />
-        <Typography variant="h5">Přidání kryptoměny</Typography>
-        <Autocomplete
-      disablePortal
-      id="combo-box-demo"
-      options={top100Films()}
-      sx={{ width: 300 }}
-      renderInput={(params) => <TextField {...params} label="Test" />}
-    />
-
-        <TextField
-          name="pocet"
-          label="Počet měny"
-          variant="outlined"
-          type="number"
-        />
-
-        <br />
-
-        <Button
-          id="btn"
-          variant="contained"
-          type="submit"
-        >Potvrdit</Button>
+        <Stack component="form" spacing={2}>
+          <Typography variant="h5">Přidání kryptoměny</Typography>
+          <Autocomplete
+            id="aucomp"
+            options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
+            renderInput={(params) => <TextField {...params} label="Test" />}
+            onChange={(event, value)=> setCryptoValue(value)}
+          />
+          <TextField
+            name="pocet"
+            label="Počet měny"
+            variant="outlined"
+            type="number"
+            onChange={(e) => setNumberOfCrypto(e.target.value)}
+          />
+          <TextField
+            id="date"
+            label="Datum zakoupení"
+            type="date"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={(e) => setDateValue(e.target.value)}
+          />
+          <Button
+            id="btn"
+            variant="contained"
+            type="submit"
+            onClick={() => clickHandler()}
+          >Potvrdit</Button>
+        </Stack >
       </div>
     );
   }
   return div;
 }
+
