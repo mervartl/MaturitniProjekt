@@ -1,18 +1,15 @@
-import { Autocomplete, Button, Stack, TextField, Typography, } from "@mui/material";
+import { Autocomplete, Box, Button, Stack, TextField, Typography, } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useUserContext } from "./userContext";
+import Moment from 'moment';
 
 export const Sidebar: React.FC = () => {
 
   const [data, setData] = useState<DataCryptos>([]);
   const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
 
-  const url =
-    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
-
-
-  
+  const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
   useEffect(() => {
     axios.get(url).then((response) => {
@@ -20,19 +17,37 @@ export const Sidebar: React.FC = () => {
     });
   }, [url]);
   useEffect(() => { //vykonana ve vicekrat
-    data.map(dat => {
-      listItems.push(dat.name);
+    data.forEach(dat => {
+      
+      //ten array data ma dve ty a ono to projede jen posledni z tech dvou arrayi
     });
-  }, [data])
+  }, [data]);
+
+  /*dat.forEach(da => {
+        //listItems.push(dat.id);
+        setListItems([
+          ...listItems,
+          createItem(
+            da.image,
+            da.name,
+            da.id
+          ),
+        ]);
+      });*/
+
+console.log(data);
 
   type Listt = {
+    img: string;
     name: string;
+    id: string;
   };
 
   type DataCryptos = {
     forEach(arg0: (dat: any) => void): unknown; //data z api
     symbol: string;
     name: string;
+    id: string;
   };
 
   const [email, setEmail] = useState<string>('');
@@ -44,11 +59,25 @@ export const Sidebar: React.FC = () => {
   const [dateValue, setDateValue] = useState('');
 
   const clickHandler = () => {
-    const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoValue}/history?date=${dateValue}`;
-
+    const dateV = Moment(dateValue).format('DD-MM-yyyy');
+    const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoValue}/history?date=${dateV}`;
     console.log(urlDate);
   };
 
+  const createItem = (
+    img: string,
+    name: string,
+    id: string,
+  ) => {
+    return {
+      img,
+      name,
+      id
+    };
+  };
+
+console.log(listItems);
+  
 
 
   const div = (
@@ -144,7 +173,7 @@ export const Sidebar: React.FC = () => {
         <div>
           {user && (
             <Button variant="outlined" onClick={() => logout?.()}>
-              Odhlaš uživatele
+              Odhlásit
             </Button>
           )}
           {() => setLogorreg('')}
@@ -154,9 +183,21 @@ export const Sidebar: React.FC = () => {
           <Typography variant="h5">Přidání kryptoměny</Typography>
           <Autocomplete
             id="aucomp"
-            options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
+            options={listItems} //vyresit ten list nejak dava names
             renderInput={(params) => <TextField {...params} label="Test" />}
+            renderOption={(props, option) => (
+              <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                <img
+                  loading="lazy"
+                  width="20"
+                  src={option.img}
+                  alt="ikona"
+                />
+                {option.name}
+              </Box>
+            )}
             onChange={(event, value)=> setCryptoValue(value)}
+            //getOptionLabel={(option) => option.name}
           />
           <TextField
             name="pocet"
@@ -172,6 +213,7 @@ export const Sidebar: React.FC = () => {
             InputLabelProps={{
               shrink: true,
             }}
+            inputFormat="dd mm yyyy"
             onChange={(e) => setDateValue(e.target.value)}
           />
           <Button
