@@ -1,21 +1,82 @@
-import { Autocomplete, AutocompleteRenderInputParams, Button, TextField, Typography, } from "@mui/material";
-import { ReactNode, useState } from "react";
+import { Autocomplete, Button, Stack, TextField, Typography, } from "@mui/material";
+import axios from "axios";
+import { addDoc, collection } from "firebase/firestore";
+import { NextCookies } from "next/dist/server/web/spec-extension/cookies";
+import { useEffect, useState } from "react";
+import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 
 export const Sidebar: React.FC = () => {
+
+  const [data, setData] = useState<DataCryptos>([]);
+  const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
+
+  const url =
+    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
+
+
+  
+
+  useEffect(() => {
+    axios.get(url).then((response) => {
+      setData(response.data);
+    });
+  }, [url]);
+  useEffect(() => { //vykonana se vicekrat
+    data.map(dat => {
+      listItems.push(dat.name);
+    });
+  }, [data])
+
+  type Listt = {
+    name: string;
+  };
+
+  type DataCryptos = {
+    forEach(arg0: (dat: any) => void): unknown; //data z api
+    symbol: string;
+    name: string;
+  };
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const { user, login, createUser, logout } = useUserContext();
   const [logorreg, setLogorreg] = useState<string>();
+  const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
+  const [cryptoName, setCryptoName] = useState('');
+  const [dateValue, setDateValue] = useState('');
+  const [cryptoSymbol, setCryptoSymbol] = useState('');
+  const [cryptoImg, setCryptoImg] = useState('');
 
-  const top100Films = () => [
-    { label: 'The Shawshank Redemption', year: 1994 },
-    { label: 'The Godfather', year: 1972 },
-    { label: 'The Godfather: Part II', year: 1974 },
-    { label: 'The Dark Knight', year: 2008 }
-  ];
+  const clickHandler = () => {
+    const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoName}/history?date=${dateValue}`;
 
+    console.log(urlDate);
+  };
+
+  const neco = "neco";
+
+  useEffect(() => {
+    data.map(dat => {
+      if(cryptoName == dat.name ){
+        setCryptoSymbol(dat.symbol);
+        setCryptoImg(dat.image);
+      }
+    });
+  },[cryptoName]);
+
+    const pushToDb = async () => {
+      const docRef = await addDoc(collection(db, "cryptocurrencies"), {
+        img: cryptoImg,
+        name: cryptoName,
+        symbol: cryptoSymbol,
+        timestamp: dateValue,
+        userId: user.user.uid,
+        value: numberOfCrypto
+      });
+
+    }
+  
 
 
   const div = (
@@ -117,31 +178,40 @@ export const Sidebar: React.FC = () => {
           {() => setLogorreg('')}
         </div>
         <br /><br />
-        <Typography variant="h5">Přidání kryptoměny</Typography>
-        <Autocomplete
-      disablePortal
-      id="combo-box-demo"
-      options={top100Films()}
-      sx={{ width: 300 }}
-      renderInput={(params) => <TextField {...params} label="Test" />}
-    />
-
-        <TextField
-          name="pocet"
-          label="Počet měny"
-          variant="outlined"
-          type="number"
-        />
-
-        <br />
-
-        <Button
-          id="btn"
-          variant="contained"
-          type="submit"
-        >Potvrdit</Button>
+        <Stack component="form" spacing={2}>
+          <Typography variant="h5">Přidání kryptoměny</Typography>
+          <Autocomplete
+            id="aucomp"
+            options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
+            renderInput={(params) => <TextField {...params} label="Test" />}
+            onChange={(event, value)=> setCryptoName(value)}
+          />
+          <TextField
+            name="pocet"
+            label="Počet měny"
+            variant="outlined"
+            type="number"
+            onChange={(e) => setNumberOfCrypto(e.target.value)}
+          />
+          <TextField
+            id="date"
+            label="Datum zakoupení"
+            type="date"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            onChange={(e) => setDateValue(e.target.value)}
+          />
+          <Button
+            id="btn"
+            variant="contained"
+            type="submit"
+            onClick={() => pushToDb()}
+          >Potvrdit</Button>
+        </Stack >
       </div>
     );
   }
   return div;
 }
+

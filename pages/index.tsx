@@ -3,7 +3,6 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
 import { Sidebar } from '../components/Sidebar'
 import styles from '../styles/Home.module.css'
 import { InputCrypto } from '../components/InputCrypto';
@@ -29,19 +28,19 @@ const Home: NextPage = () => {
       <div>
 
         <Grid container columns={12} spacing={2}>
-          <Grid item xs={2.5} textAlign="center" backgroundColor="#282828"></Grid>
-          <Grid item xs={9.5} backgroundColor="#282828">
+          <Grid item xs={2.5} textAlign="center"></Grid>
+          <Grid item xs={9.5}>
             <Typography variant="h3" component="h1" gutterBottom textAlign="center">
               Crypto portfolium
             </Typography>
           </Grid>
           <Grid container columns={12} spacing={2}>
             <Grid container columns={12} spacing={2}>
-              <Grid item xs={2.5} textAlign="center" marginTop="2%" backgroundColor="#282828"><Sidebar /></Grid>
-              <Grid item xs={9.5} textAlign="center" padding="100% 0%" marginTop="2%" backgroundColor="#202020"><InputCrypto/></Grid>
+              <Grid item xs={2.5} textAlign="center" marginTop="2%"><Sidebar /></Grid>
+              <Grid item xs={9.5} textAlign="center" padding="100% 0%" marginTop="2%" className={styles.bod}><InputCrypto/></Grid>
             </Grid>
           </Grid>
-          <Grid container columns={12} spacing={2} backgroundColor="#282828">
+          <Grid container columns={12} spacing={2}>
             <Grid item xs={12} textAlign="center" bottom="0" width="100%">
               Footer
             </Grid>

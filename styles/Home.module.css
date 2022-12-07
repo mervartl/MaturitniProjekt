@@ -1,7 +1,10 @@
 .container {
   padding: 0 2rem;
+  background-color: #282828
 }
-
+.bod{
+  background-color: #202020
+}
 .main {
   min-height: 100vh;
   padding: 4rem 0;
