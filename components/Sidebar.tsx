@@ -5,6 +5,7 @@ import { NextCookies } from "next/dist/server/web/spec-extension/cookies";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
+import Moment from 'moment';
 
 export const Sidebar: React.FC = () => {
 
@@ -172,7 +173,7 @@ export const Sidebar: React.FC = () => {
         <div>
           {user && (
             <Button variant="outlined" onClick={() => logout?.()}>
-              Odhlaš uživatele
+              Odhlásit
             </Button>
           )}
           {() => setLogorreg('')}
