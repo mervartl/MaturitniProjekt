@@ -1,11 +1,9 @@
 import { Autocomplete, Button, Stack, TextField, Typography, } from "@mui/material";
 import axios from "axios";
 import { addDoc, collection } from "firebase/firestore";
-import { NextCookies } from "next/dist/server/web/spec-extension/cookies";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
-import Moment from 'moment';
 
 export const Sidebar: React.FC = () => {
 
@@ -16,7 +14,7 @@ export const Sidebar: React.FC = () => {
     'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
 
-  
+
 
   useEffect(() => {
     axios.get(url).then((response) => {
@@ -27,14 +25,14 @@ export const Sidebar: React.FC = () => {
     data.map(dat => {
       listItems.push(dat.name);
     });
-  }, [data])
+  }, [url])
 
   type Listt = {
     name: string;
   };
 
   type DataCryptos = {
-    forEach(arg0: (dat: any) => void): unknown; //data z api
+    map(arg0: (dat: any) => void): unknown;
     symbol: string;
     name: string;
   };
@@ -59,25 +57,13 @@ export const Sidebar: React.FC = () => {
 
   useEffect(() => {
     data.map(dat => {
-      if(cryptoName == dat.name ){
+      if (cryptoName == dat.name) {
         setCryptoSymbol(dat.symbol);
         setCryptoImg(dat.image);
       }
     });
-  },[cryptoName]);
+  }, [cryptoName]);
 
-    const pushToDb = async () => {
-      const docRef = await addDoc(collection(db, "cryptocurrencies"), {
-        img: cryptoImg,
-        name: cryptoName,
-        symbol: cryptoSymbol,
-        timestamp: dateValue,
-        userId: user.user.uid,
-        value: numberOfCrypto
-      });
-
-    }
-  
 
 
   const div = (
@@ -165,9 +151,20 @@ export const Sidebar: React.FC = () => {
     }
   }
   if (user) {
+    const pushToDb = async () => {
+      const docRef = await addDoc(collection(db, "cryptocurrencies"), {
+        img: cryptoImg,
+        name: cryptoName,
+        symbol: cryptoSymbol,
+        timestamp: dateValue,
+        userId: user.user.uid,
+        value: numberOfCrypto
+      });
+
+    }
     return (
       <div>
-        <Typography variant="body1">
+        <Typography variant="body1" margin="0 0 0.5rem 0">
           Přihlášen uživatel<br /> {user.user.email}
         </Typography>
         <div>
@@ -179,13 +176,13 @@ export const Sidebar: React.FC = () => {
           {() => setLogorreg('')}
         </div>
         <br /><br />
-        <Stack component="form" spacing={2}>
+        <Stack component="form" spacing={2} margin="0 0.7rem">
           <Typography variant="h5">Přidání kryptoměny</Typography>
           <Autocomplete
             id="aucomp"
             options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
             renderInput={(params) => <TextField {...params} label="Test" />}
-            onChange={(event, value)=> setCryptoName(value)}
+            onChange={(event, value) => setCryptoName(value)}
           />
           <TextField
             name="pocet"

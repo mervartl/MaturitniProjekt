@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "@firebase/firestore";
+import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
@@ -59,11 +59,7 @@ export const InputCrypto: React.FC = (cryptolist) => {
                 crypto.current_price = dat.current_price;
             }
         }); 
-    });
-
-    console.log(cryptos);
-
-    
+    });    
 
     const div = <div>
         {user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? <div><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {crypto.current_price} Kč</div> : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
