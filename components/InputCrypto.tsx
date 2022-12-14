@@ -3,9 +3,9 @@ import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Typography } from "@mui/material";
+import { Button, Link, Typography } from "@mui/material";
 
-export const InputCrypto: React.FC = (cryptolist) => {
+export const InputCrypto: React.FC = ({ onQuer }) => {
     
     type DataCryptos = {
         forEach(arg0: (dat: any) => void): unknown; //data z api
@@ -61,8 +61,14 @@ export const InputCrypto: React.FC = (cryptolist) => {
         }); 
     });    
 
+    const clickMajsner = (cname: any) => {
+        onQuer(cname);
+    };
+
+    
+
     const div = <div>
-        {user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? <div><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {crypto.current_price} Kč</div> : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
+        {user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? <div><Link href='/detail'><Button onClick={() => clickMajsner(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {crypto.current_price} Kč</Button></Link></div> : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
     </div>
 
     return div;

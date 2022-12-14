@@ -10,22 +10,16 @@ export const Sidebar: React.FC = () => {
   const [data, setData] = useState<DataCryptos>([]);
   const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
 
-  const url =
-    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const { user, login, createUser, logout } = useUserContext();
+  const [logorreg, setLogorreg] = useState<string>();
+  const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
+  const [cryptoName, setCryptoName] = useState('');
+  const [dateValue, setDateValue] = useState('');
+  const [cryptoSymbol, setCryptoSymbol] = useState('');
+  const [cryptoImg, setCryptoImg] = useState('');
 
-
-
-
-  useEffect(() => {
-    axios.get(url).then((response) => {
-      setData(response.data);
-    });
-  }, [url]);
-  useEffect(() => { //vykonana se vicekrat
-    data.map(dat => {
-      listItems.push(dat.name);
-    });
-  }, [url])
 
   type Listt = {
     name: string;
@@ -37,23 +31,32 @@ export const Sidebar: React.FC = () => {
     name: string;
   };
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const { user, login, createUser, logout } = useUserContext();
-  const [logorreg, setLogorreg] = useState<string>();
-  const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
-  const [cryptoName, setCryptoName] = useState('');
-  const [dateValue, setDateValue] = useState('');
-  const [cryptoSymbol, setCryptoSymbol] = useState('');
-  const [cryptoImg, setCryptoImg] = useState('');
+  const url =
+    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
+
+
+  useEffect(() => {
+    axios.get(url).then((response) => {
+      setData(response.data);
+    });
+  }, []);
+
+  
+  useEffect(() => { //vykonana se vicekrat [data] nebo vubec [cokoliv]
+      data.map(dat => {
+      listItems.push(dat.name);
+      console.log("data se pushli");
+    });
+  }, [data])
+
+  
   const clickHandler = () => {
     const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoName}/history?date=${dateValue}`;
 
     console.log(urlDate);
   };
 
-  const neco = "neco";
 
   useEffect(() => {
     data.map(dat => {
@@ -181,7 +184,7 @@ export const Sidebar: React.FC = () => {
           <Autocomplete
             id="aucomp"
             options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
-            renderInput={(params) => <TextField {...params} label="Test" />}
+            renderInput={(params) => <TextField {...params} label="Kryptoměny" />}
             onChange={(event, value) => setCryptoName(value)}
           />
           <TextField
@@ -204,6 +207,7 @@ export const Sidebar: React.FC = () => {
             id="btn"
             variant="contained"
             type="submit"
+            
             onClick={() => pushToDb()}
           >Potvrdit</Button>
         </Stack >
