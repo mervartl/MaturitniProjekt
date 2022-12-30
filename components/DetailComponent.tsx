@@ -1,10 +1,14 @@
-import { Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { useState } from "react";
 
-export const DetailComponent : React.FC = (props) => {
-    console.log(props);
-    const div = <div></div>
+export const DetailComponent : React.FC = ({name, setDtail}) => {
 
-    return div;
+
+    return(       
+        <div>
+            <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
+            {name}
+        </div>
+    )
 }
 

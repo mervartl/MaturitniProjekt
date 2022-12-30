@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
 import { Button, Link, Typography } from "@mui/material";
+import { DetailComponent } from "./DetailComponent";
 
-export const InputCrypto: React.FC = ({ onQuer }) => {
-    
+export const InputCrypto: React.FC = ( ) => {
+
     type DataCryptos = {
         forEach(arg0: (dat: any) => void): unknown; //data z api
         id: string;
@@ -61,14 +62,19 @@ export const InputCrypto: React.FC = ({ onQuer }) => {
         }); 
     });    
 
-    const clickMajsner = (cname: any) => {
-        onQuer(cname);
-    };
+    const [dtail, setDtail] = useState(false);
+    const [em, setEm] = useState();
+    const onButtonClick=(m)=>{
+        setEm(m);
+        setDtail(true);
+    }
 
-    
+
+
 
     const div = <div>
-        {user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? <div><Link href='/detail'><Button onClick={() => clickMajsner(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {crypto.current_price} Kč</Button></Link></div> : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
+        {}
+        {dtail ? (<DetailComponent name={em} setDtail={setDtail}/>) : user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={()=>onButtonClick(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
     </div>
 
     return div;

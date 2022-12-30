@@ -18,7 +18,7 @@ const Home: NextPage = () => {
           <Grid item xs={2.5} textAlign="center"></Grid>
           <Grid item xs={9.5}>
             <Typography variant="h3" gutterBottom textAlign="center">
-              Crypto portfolium
+              CRYPTO PORTFOLIUM
             </Typography>
           </Grid>
           <Grid container columns={12} spacing={2}>
