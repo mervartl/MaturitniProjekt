@@ -50,13 +50,6 @@ export const Sidebar: React.FC = () => {
     });
   }, [data])
 
-  
-  const clickHandler = () => {
-    const urlDate = `https://api.coingecko.com/api/v3/coins/${cryptoName}/history?date=${dateValue}`;
-
-    console.log(urlDate);
-  };
-
 
   useEffect(() => {
     data.map(dat => {

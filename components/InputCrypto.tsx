@@ -3,7 +3,7 @@ import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Button, Link, Typography } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import { DetailComponent } from "./DetailComponent";
 
 export const InputCrypto: React.FC = ( ) => {
@@ -27,12 +27,14 @@ export const InputCrypto: React.FC = ( ) => {
         img: string;
         value: number;
         userId: string;
+        timestamp: string;
       };
 
 
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
     const [data, setData] = useState<DataCryptos>([]);
+    const [cid, setCid] = useState();
 
 
     const url =
@@ -49,7 +51,7 @@ export const InputCrypto: React.FC = ( ) => {
         const collectionRef = collection(db, "cryptocurrencies")
         const q = query(collectionRef); //, orderBy("value")
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            setCryptos(querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, timestamp: doc.timestamp })))
+            setCryptos(querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id})))
         });
         return unsubscribe;
     }, [])
@@ -63,9 +65,9 @@ export const InputCrypto: React.FC = ( ) => {
     });    
 
     const [dtail, setDtail] = useState(false);
-    const [em, setEm] = useState();
-    const onButtonClick=(m)=>{
-        setEm(m);
+
+    const onButtonClick=(id)=>{
+        setCid(id);
         setDtail(true);
     }
 
@@ -74,7 +76,7 @@ export const InputCrypto: React.FC = ( ) => {
 
     const div = <div>
         {}
-        {dtail ? (<DetailComponent name={em} setDtail={setDtail}/>) : user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={()=>onButtonClick(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
+        {dtail ? (<DetailComponent setDtail={setDtail} cid={cid}/>) : user ? (cryptos.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={()=>onButtonClick(crypto.id)}><img src={crypto.img} width="30"></img> {crypto.name} {crypto.value} cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
     </div>
 
     return div;
