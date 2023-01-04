@@ -19,6 +19,7 @@ export const Sidebar: React.FC = () => {
   const [dateValue, setDateValue] = useState('');
   const [cryptoSymbol, setCryptoSymbol] = useState('');
   const [cryptoImg, setCryptoImg] = useState('');
+  const [cryptoNameId, setCryptoNameId] = useState('');
 
 
   type Listt = {
@@ -56,9 +57,14 @@ export const Sidebar: React.FC = () => {
       if (cryptoName == dat.name) {
         setCryptoSymbol(dat.symbol);
         setCryptoImg(dat.image);
+        setCryptoNameId(dat.id)
       }
     });
   }, [cryptoName]);
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+  };
 
 
 
@@ -154,10 +160,11 @@ export const Sidebar: React.FC = () => {
         symbol: cryptoSymbol,
         timestamp: dateValue,
         userId: user.user.uid,
-        value: numberOfCrypto
+        value: numberOfCrypto,
+        nameId: cryptoNameId
       });
-
     }
+
     return (
       <div>
         <Typography variant="body1" margin="0 0 0.5rem 0">
@@ -172,7 +179,7 @@ export const Sidebar: React.FC = () => {
           {() => setLogorreg('')}
         </div>
         <br /><br />
-        <Stack component="form" spacing={2} margin="0 0.7rem">
+        <Stack component="form" spacing={2} margin="0 0.7rem" onSubmit={onSubmit}>
           <Typography variant="h5">Přidání kryptoměny</Typography>
           <Autocomplete
             id="aucomp"
