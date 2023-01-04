@@ -181,7 +181,6 @@ export const Sidebar: React.FC = () => {
             onChange={(event, value) => setCryptoName(value)}
           />
           <TextField
-            name="pocet"
             label="Počet měny"
             variant="outlined"
             type="number"

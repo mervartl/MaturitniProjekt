@@ -8,13 +8,17 @@ import Moment from 'moment';
 export const DetailComponent : React.FC = ({setDtail, cid}) => {
 
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
+    const [histoData, setHistoData] = useState();
+    const [curData, setCurData] = useState();
 
-    const [symbol, setSymbol] = useState("");
     const [name, setName] = useState("");
     const [img, setImg] = useState("");
     const [value, setValue] = useState("");
     const [tstamp, setTstamp] = useState("");
     const [urlId, setUrlId] = useState("");
+
+    const [url, setUrl] = useState("");
+    const [hisUrl, setHisUrl] = useState("");
     
     type DBCryptos = { //data z databaze
         map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
@@ -41,7 +45,6 @@ export const DetailComponent : React.FC = ({setDtail, cid}) => {
         cryptos.forEach(crypto => {
             if(crypto.id == cid)
             {
-                setSymbol(crypto.name);
                 setName(crypto.name);
                 setUrlId(crypto.name.toLowerCase());
                 setImg(crypto.img);
@@ -49,29 +52,32 @@ export const DetailComponent : React.FC = ({setDtail, cid}) => {
                 setTstamp(Moment(crypto.timestamp).format('DD-MM-yyyy'));
             }
         });
+
+        setHisUrl(`https://api.coingecko.com/api/v3/coins/${urlId}/history?date=${tstamp}`);
+        setUrl(`https://api.coingecko.com/api/v3/coins/${urlId}?market_data=true&community_data=false&developer_data=false`);
     },[cryptos])
 
-    
-
-    
-
-    /*useEffect(() => {
-        axios.get(url).then((response) => {
-            setData(response.data);
-            ;
+    useEffect(() => {
+        axios.get(hisUrl).then((response) => {
+            setHistoData(response.data);
+            
         });
-    }, [url]);*/
+    }, [hisUrl]);
 
-    const cus = () =>{
-        const url = `https://api.coingecko.com/api/v3/coins/${urlId}/history?date=${tstamp}`;
-        console.log(url)
-    }
+    useEffect(() => {
+        axios.get(url).then((response) => {
+            setCurData(response.data);
+            
+        });
+    }, [url]);
     
+    
+    console.log(curData);
+    console.log(histoData);
 
     return(       
         <div>
             <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
-            <Button onClick={() => cus()}>link</Button>
             {cid} {name}
         </div>
     )
