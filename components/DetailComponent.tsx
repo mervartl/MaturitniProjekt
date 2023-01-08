@@ -29,7 +29,7 @@ export const DetailComponent : React.FC = ({setDtail, cid}) => {
         value: number;
         timestamp: string;
         nameId: string;
-      };
+    };    
 
     useEffect(() => {
         const collectionRef = collection(db, "cryptocurrencies")

@@ -34,7 +34,7 @@ export const InputCrypto: React.FC = ( ) => {
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
     const [data, setData] = useState<DataCryptos>([]);
-    const [cid, setCid] = useState();
+    const [cid, setCid] = useState<string>();
 
 
     const url =
@@ -66,7 +66,7 @@ export const InputCrypto: React.FC = ( ) => {
 
     const [dtail, setDtail] = useState(false);
 
-    const onButtonClick=(id)=>{
+    const onButtonClick=(id: string)=>{
         setCid(id);
         setDtail(true);
     }

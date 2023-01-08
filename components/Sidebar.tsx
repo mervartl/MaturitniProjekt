@@ -1,26 +1,43 @@
-import { Autocomplete, Button, Stack, TextField, Typography, } from "@mui/material";
+import {
+  Autocomplete,
+  Button,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
 import axios from "axios";
-import { addDoc, collection } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  CollectionReference,
+  doc,
+  DocumentData,
+  FieldValue,
+  increment,
+  onSnapshot,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 
 export const Sidebar: React.FC = () => {
-
   const [data, setData] = useState<DataCryptos>([]);
   const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
   const { user, login, createUser, logout } = useUserContext();
   const [logorreg, setLogorreg] = useState<string>();
   const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
-  const [cryptoName, setCryptoName] = useState('');
-  const [dateValue, setDateValue] = useState('');
-  const [cryptoSymbol, setCryptoSymbol] = useState('');
-  const [cryptoImg, setCryptoImg] = useState('');
-  const [cryptoNameId, setCryptoNameId] = useState('');
+  const [cryptoName, setCryptoName] = useState<string>();
+  const [dateValue, setDateValue] = useState("");
+  const [cryptoSymbol, setCryptoSymbol] = useState("");
+  const [cryptoImg, setCryptoImg] = useState("");
+  const [cryptoNameId, setCryptoNameId] = useState("");
 
+  const [cryptos, setCryptos] = useState<DBCryptos>([]);
 
   type Listt = {
     name: string;
@@ -32,10 +49,15 @@ export const Sidebar: React.FC = () => {
     name: string;
   };
 
+  type DBCryptos = {
+    //data z databaze
+    map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
+    id: string;
+    name: string;
+  };
+
   const url =
-    'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
-
-
+    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
 
   useEffect(() => {
     axios.get(url).then((response) => {
@@ -43,44 +65,68 @@ export const Sidebar: React.FC = () => {
     });
   }, []);
 
-  
-  useEffect(() => { //vykonana se vicekrat [data] nebo vubec [cokoliv]
-      data.map(dat => {
+  useEffect(() => {
+    const collectionRef = collection(db, "cryptocurrencies");
+    const q = query(collectionRef); //, orderBy("value")
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      setCryptos(
+        querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+      );
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    //vykonana se vicekrat [data] nebo vubec [cokoliv]
+    data.map((dat) => {
       listItems.push(dat.name);
       console.log("data se pushli");
     });
-  }, [data])
-
+  }, [data]);
 
   useEffect(() => {
-    data.map(dat => {
+    data.map((dat) => {
       if (cryptoName == dat.name) {
         setCryptoSymbol(dat.symbol);
         setCryptoImg(dat.image);
-        setCryptoNameId(dat.id)
+        setCryptoNameId(dat.id);
       }
     });
   }, [cryptoName]);
 
-  const onSubmit = (e) => {
+  const onSubmit = (e: any) => {
     e.preventDefault();
   };
 
+  const isNotInFuture = (dateValue: string) => {
+    if (dateValue != null && dateValue != "") {
+      const inputDate = new Date(dateValue);
+      const now = new Date();
 
+      if (inputDate > now) {
+        console.log("Datum je v budoucnu");
+        return false;
+      } else {
+        return true;
+      }
+    }
+  };
+
+  let majsner = 0;
 
   const div = (
     <div>
       <br />
-      <Button variant="outlined" onClick={() => setLogorreg('Log')}>
+      <Button variant="outlined" onClick={() => setLogorreg("Log")}>
         Přihlášení
       </Button>
-      <Button variant="outlined" onClick={() => setLogorreg('Reg')}>
+      <Button variant="outlined" onClick={() => setLogorreg("Reg")}>
         Registrace
       </Button>
     </div>
   );
   if (!user) {
-    if (logorreg === 'Log') {
+    if (logorreg === "Log") {
       return (
         <div>
           <div>
@@ -108,14 +154,14 @@ export const Sidebar: React.FC = () => {
                 variant="outlined"
                 onClick={() => login?.(email, password)}
               >
-                Prihlas{' '}
+                Prihlas{" "}
               </Button>
             )}
           </div>
         </div>
       );
     }
-    if (logorreg === 'Reg') {
+    if (logorreg === "Reg") {
       return (
         <div>
           <div>
@@ -154,21 +200,38 @@ export const Sidebar: React.FC = () => {
   }
   if (user) {
     const pushToDb = async () => {
-      const docRef = await addDoc(collection(db, "cryptocurrencies"), {
-        img: cryptoImg,
-        name: cryptoName,
-        symbol: cryptoSymbol,
-        timestamp: dateValue,
-        userId: user.user.uid,
-        value: numberOfCrypto,
-        nameId: cryptoNameId
-      });
-    }
+      if (!isNaN(numberOfCrypto) && isNotInFuture(dateValue)) {
+        /*cryptos.map(async (crypto) => {
+          if (crypto.name == cryptoName) {
+            majsner++;
+            const washingtonRef = doc(db, "cryptocurrencies", crypto.id);
+
+            await updateDoc(washingtonRef, {
+              value: increment(numberOfCrypto),
+            });
+          }
+        });*/
+        if (majsner ===0) {
+          const docRef = await addDoc(collection(db, "cryptocurrencies"), {
+            img: cryptoImg,
+            name: cryptoName,
+            symbol: cryptoSymbol,
+            timestamp: dateValue,
+            userId: user.user.uid,
+            value: numberOfCrypto,
+            nameId: cryptoNameId,
+          });
+        }
+      } else {
+        console.log("value neni cislo nebo je datum v budoucnu");
+      }
+    };
 
     return (
       <div>
         <Typography variant="body1" margin="0 0 0.5rem 0">
-          Přihlášen uživatel<br /> {user.user.email}
+          Přihlášen uživatel
+          <br /> {user.user.email}
         </Typography>
         <div>
           {user && (
@@ -176,15 +239,23 @@ export const Sidebar: React.FC = () => {
               Odhlásit
             </Button>
           )}
-          {() => setLogorreg('')}
+          {() => setLogorreg("")}
         </div>
-        <br /><br />
-        <Stack component="form" spacing={2} margin="0 0.7rem" onSubmit={onSubmit}>
+        <br />
+        <br />
+        <Stack
+          component="form"
+          spacing={2}
+          margin="0 0.7rem"
+          onSubmit={onSubmit}
+        >
           <Typography variant="h5">Přidání kryptoměny</Typography>
           <Autocomplete
             id="aucomp"
-            options={listItems} //vyresit ten list nejak dava names a na ten odkaz je potreba symbol asi
-            renderInput={(params) => <TextField {...params} label="Kryptoměny" />}
+            options={listItems}
+            renderInput={(params) => (
+              <TextField {...params} label="Kryptoměny" />
+            )}
             onChange={(event, value) => setCryptoName(value)}
           />
           <TextField
@@ -206,13 +277,12 @@ export const Sidebar: React.FC = () => {
             id="btn"
             variant="contained"
             type="submit"
-            
             onClick={() => pushToDb()}
-          >Potvrdit</Button>
-        </Stack >
+          >
+            Potvrdit
+          </Button>
+        </Stack>
       </div>
     );
-  }
-  return div;
-}
-
+  } else return div;
+};
