@@ -130,8 +130,8 @@ export const Sidebar: React.FC = () => {
       return (
         <div>
           <div>
-            Login
-            <br />
+          <Button onClick={() => setLogorreg("")}>Zpět</Button>
+          <Typography variant="h4">Přihlášení</Typography>
             <TextField
               name="email"
               label="Email"
@@ -165,8 +165,8 @@ export const Sidebar: React.FC = () => {
       return (
         <div>
           <div>
-            Registrace
-            <br />
+          <Button onClick={() => setLogorreg("")}>Zpět</Button>
+            <Typography variant="h4">Registrace</Typography>
             <TextField
               name="email"
               label="Email"
@@ -229,19 +229,6 @@ export const Sidebar: React.FC = () => {
 
     return (
       <div>
-        <Typography variant="body1" margin="0 0 0.5rem 0">
-          Přihlášen uživatel
-          <br /> {user.user.email}
-        </Typography>
-        <div>
-          {user && (
-            <Button variant="outlined" onClick={() => logout?.()}>
-              Odhlásit
-            </Button>
-          )}
-          {() => setLogorreg("")}
-        </div>
-        <br />
         <br />
         <Stack
           component="form"

@@ -3,7 +3,11 @@ import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Paper,  TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import dynamic from 'next/dynamic'
+const Table = dynamic(() => import("@mui/material/Table"), {
+ssr: false,
+});
 import { DetailComponent } from "./DetailComponent";
 
 
@@ -113,7 +117,7 @@ export const InputCrypto: React.FC = () => {
 
     const div = <div>
         {dtail ? (<DetailComponent setDtail={setDtail} cid={cid} />) : 
-        (<TableContainer>
+        ( user? (<TableContainer component={Paper}>
             <Table sx={{maxWidth: 1200, minWidth: 500}}>
                 <TableHead>
                     <TableRow>
@@ -125,23 +129,20 @@ export const InputCrypto: React.FC = () => {
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {user ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (
-                        
+                    {user && cryptoObj ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (
                         <TableRow key={crypto.name}>          
-                            <img src={crypto.img} alt={crypto.name} width="30"></img>
-                            
-                            <TableCell >{crypto.name}</TableCell>
+                            <TableCell><img src={crypto.img}alt={crypto.name}width="30"/></TableCell>       
+                            <TableCell>{crypto.name}</TableCell>
                             <TableCell>{crypto.value}</TableCell>
                             <TableCell>{Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</TableCell>
-                            <TableCell component="button" onClick={()=>onButtonClick(crypto.name)}>Detail {crypto.name}</TableCell>   
-                        </TableRow>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>}
+                            <TableCell><Button onClick={()=>onButtonClick(crypto.name)}>Detail</Button></TableCell>   
+                        </TableRow>) : null)): null}
                 </TableBody>
             </Table>
-        </TableContainer>)}
-
-        {/*dtail ? (<DetailComponent setDtail={setDtail} cid={cid} />) : user ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={() => onButtonClick(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} | {crypto.value} | cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>*/}
+        </TableContainer>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
     </div>
 
     return div;
 }
 
+/*dtail ? (<DetailComponent setDtail={setDtail} cid={cid} />) : user ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={() => onButtonClick(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} | {crypto.value} | cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>*/

@@ -4,6 +4,7 @@ import Head from 'next/head'
 import { Sidebar } from '../components/Sidebar'
 import styles from '../styles/Home.module.css'
 import { InputCrypto } from '../components/InputCrypto';
+import { LogReg } from '../components/LogReg';
 
 const Home: NextPage = () => {
   return (
@@ -15,16 +16,16 @@ const Home: NextPage = () => {
       </Head>
       <div>
         <Grid container columns={12} spacing={2}>
-          <Grid item xs={2.5} textAlign="center"></Grid>
-          <Grid item xs={9.5}>
-            <Typography variant="h3" gutterBottom textAlign="center">
+          <Grid item xs={2.5} textAlign="center" marginTop="1.5%" paddingRight="3%"><LogReg/></Grid>
+          <Grid item xs={9.5} textAlign="center" marginTop="1%">
+            <Typography variant="h3" textAlign="center">
               CRYPTO PORTFOLIUM
             </Typography>
           </Grid>
           <Grid container columns={12} spacing={2}>
             <Grid container columns={12} spacing={2}>
-              <Grid item xs={2.5} textAlign="center" marginTop="2%"><Sidebar /></Grid>
-              <Grid item xs={9.5} textAlign="center" padding="100% 0%" marginTop="2%" className={styles.bod}><InputCrypto/></Grid>
+              <Grid item md={2.5} xs={12} textAlign="center" marginTop="2%"><Sidebar /></Grid>
+              <Grid item md={9.5} xs={12} textAlign="center" padding="0%" minHeight="950px" marginTop="2%" className={styles.bod}><InputCrypto/></Grid>
             </Grid>
           </Grid>
           <Grid container columns={12} spacing={2}>
