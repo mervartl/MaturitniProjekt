@@ -3,7 +3,7 @@ import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { DetailComponent } from "./DetailComponent";
 
 
@@ -16,6 +16,20 @@ export const InputCrypto: React.FC = () => {
         name: string;
         image: string;
         current_price: number;
+    };
+
+    type MergedCryptos = {
+        push(obj: any): unknown;
+        find(arg0: (o: any) => boolean): unknown;
+        current_price: number
+        id: string
+        img: string
+        name: string
+        nameId: string
+        symbol: string
+        timestamp: string
+        userId: string
+        value: number
     };
 
 
@@ -64,17 +78,14 @@ export const InputCrypto: React.FC = () => {
         });
     });
 
-
     const [cryptoObj, setCryptoObj] = useState();
 
     useEffect(() => {
         setCryptoObj(mergeOb(cryptos));
     }, [cryptos]);
 
-    console.log(cryptoObj);
-
-    const mergeOb = (objects) => {
-        const mergedObjects = [];
+    const mergeOb = (objects: DBCryptos) => {
+        const mergedObjects: MergedCryptos = [];
 
         objects.forEach(obj => {
             const existingObject = mergedObjects.find(o => o.name === obj.name);
