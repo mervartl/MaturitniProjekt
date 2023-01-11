@@ -53,7 +53,6 @@ export const InputCrypto: React.FC = () => {
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
     const [data, setData] = useState<DataCryptos>([]);
-    const [cid, setCid] = useState<string>();
 
 
     const url =
@@ -104,11 +103,11 @@ export const InputCrypto: React.FC = () => {
     }
 
 
-
+    const [cName, setCName] = useState<string>();
     const [dtail, setDtail] = useState(false);
 
-    const onButtonClick = (id: string) => {
-        setCid(id);
+    const onButtonClick = (name: string) => {
+        setCName(name);
         setDtail(true);
     }
 
@@ -116,8 +115,8 @@ export const InputCrypto: React.FC = () => {
 
 
     const div = <div>
-        {dtail ? (<DetailComponent setDtail={setDtail} cid={cid} />) : 
-        ( user? (<TableContainer component={Paper}>
+        {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) : 
+        ( user ? (<TableContainer component={Paper}>
             <Table sx={{maxWidth: 1200, minWidth: 500}}>
                 <TableHead>
                     <TableRow>
