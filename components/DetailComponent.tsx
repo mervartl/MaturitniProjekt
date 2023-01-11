@@ -1,6 +1,7 @@
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import axios from "axios";
 import { collection, query, onSnapshot, where, doc, deleteDoc } from "firebase/firestore";
+import moment from "moment";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
 
@@ -198,7 +199,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
         {cryptos.map(crypto =>
         (<Grid container columns={1} spacing={1}>
           <Grid item xs={1} textAlign="center">
-            <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený v {crypto.timestamp}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
+            <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený v {moment(crypto.timestamp).format("MMM Do YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
               <Grid item xs={1} >
                 <Typography paddingTop="2%">Price for one: {Math.round(crypto.historical_price * 100) / 100} Kč</Typography>
