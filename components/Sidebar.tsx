@@ -130,8 +130,8 @@ export const Sidebar: React.FC = () => {
       return (
         <div>
           <div>
-          <Button onClick={() => setLogorreg("")}>Zpět</Button>
-          <Typography variant="h4">Přihlášení</Typography>
+            <Button onClick={() => setLogorreg("")}>Zpět</Button>
+            <Typography variant="h4">Přihlášení</Typography>
             <TextField
               name="email"
               label="Email"
@@ -165,7 +165,7 @@ export const Sidebar: React.FC = () => {
       return (
         <div>
           <div>
-          <Button onClick={() => setLogorreg("")}>Zpět</Button>
+            <Button onClick={() => setLogorreg("")}>Zpět</Button>
             <Typography variant="h4">Registrace</Typography>
             <TextField
               name="email"
@@ -201,27 +201,17 @@ export const Sidebar: React.FC = () => {
   if (user) {
     const pushToDb = async () => {
       if (!isNaN(numberOfCrypto) && isNotInFuture(dateValue)) {
-        /*cryptos.map(async (crypto) => {
-          if (crypto.name == cryptoName) {
-            majsner++;
-            const washingtonRef = doc(db, "cryptocurrencies", crypto.id);
 
-            await updateDoc(washingtonRef, {
-              value: increment(numberOfCrypto),
-            });
-          }
-        });*/
-        if (majsner ===0) {
-          const docRef = await addDoc(collection(db, "cryptocurrencies"), {
-            img: cryptoImg,
-            name: cryptoName,
-            symbol: cryptoSymbol,
-            timestamp: dateValue,
-            userId: user.user.uid,
-            value: numberOfCrypto,
-            nameId: cryptoNameId,
-          });
-        }
+        const docRef = await addDoc(collection(db, "cryptocurrencies"), {
+          img: cryptoImg,
+          name: cryptoName,
+          symbol: cryptoSymbol,
+          timestamp: dateValue,
+          userId: user.user.uid,
+          value: numberOfCrypto,
+          nameId: cryptoNameId,
+        });
+
       } else {
         console.log("value neni cislo nebo je datum v budoucnu");
       }
