@@ -136,7 +136,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
                 
                   setHPriceAssigned(true);
                   crypto.historical_price = val[1];
-                
               }
             });
           }
@@ -146,7 +145,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
                 
                   setHPriceAssigned(true);
                   crypto.historical_mcap = val[1];
-                
               }
             });
           }
@@ -156,7 +154,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
                 
                   setHPriceAssigned(true);
                   crypto.historical_tvolume = val[1];
-                
               }
             });
           }
@@ -169,7 +166,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
 
-  if (hPriceAssigned) {
+  if (hPriceAssigned && sum) {
     return (
       <div>
         <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>

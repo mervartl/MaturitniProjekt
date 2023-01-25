@@ -112,8 +112,6 @@ export const Sidebar: React.FC = () => {
     }
   };
 
-  let majsner = 0;
-
   const div = (
     <div>
       <br />
@@ -200,7 +198,7 @@ export const Sidebar: React.FC = () => {
   }
   if (user) {
     const pushToDb = async () => {
-      if (!isNaN(numberOfCrypto) && isNotInFuture(dateValue)) {
+      if (!isNaN(numberOfCrypto) && numberOfCrypto > 0 && isNotInFuture(dateValue)) {
 
         const docRef = await addDoc(collection(db, "cryptocurrencies"), {
           img: cryptoImg,
@@ -213,7 +211,7 @@ export const Sidebar: React.FC = () => {
         });
 
       } else {
-        console.log("value neni cislo nebo je datum v budoucnu");
+        console.log("value neni cislo nebo je zaporne nebo nula nebo je datum v budoucnu");
       }
     };
 
@@ -240,6 +238,11 @@ export const Sidebar: React.FC = () => {
             variant="outlined"
             type="number"
             onChange={(e) => setNumberOfCrypto(e.target.value)}
+            
+            inputProps={{
+              step: "0.00001",
+              min: "0.00001"
+            }}
           />
           <TextField
             id="date"
