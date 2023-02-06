@@ -9,14 +9,8 @@ import axios from "axios";
 import {
   addDoc,
   collection,
-  CollectionReference,
-  doc,
-  DocumentData,
-  FieldValue,
-  increment,
   onSnapshot,
   query,
-  updateDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { db } from "../firebase";
@@ -26,10 +20,7 @@ export const Sidebar: React.FC = () => {
   const [data, setData] = useState<DataCryptos>([]);
   const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const { user, login, createUser, logout } = useUserContext();
-  const [logorreg, setLogorreg] = useState<string>();
+  const { user } = useUserContext();
   const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
   const [cryptoName, setCryptoName] = useState<string>();
   const [dateValue, setDateValue] = useState("");
@@ -114,88 +105,9 @@ export const Sidebar: React.FC = () => {
 
   const div = (
     <div>
-      <br />
-      <Button variant="outlined" onClick={() => setLogorreg("Log")}>
-        Přihlášení
-      </Button>
-      <Button variant="outlined" onClick={() => setLogorreg("Reg")}>
-        Registrace
-      </Button>
     </div>
   );
-  if (!user) {
-    if (logorreg === "Log") {
-      return (
-        <div>
-          <div>
-            <Button onClick={() => setLogorreg("")}>Zpět</Button>
-            <Typography variant="h4">Přihlášení</Typography>
-            <TextField
-              name="email"
-              label="Email"
-              variant="outlined"
-              type="text"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              name="password"
-              label="Heslo"
-              variant="outlined"
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <br />
-            {user ? (
-              user.user.email
-            ) : (
-              <Button
-                variant="outlined"
-                onClick={() => login?.(email, password)}
-              >
-                Prihlas{" "}
-              </Button>
-            )}
-          </div>
-        </div>
-      );
-    }
-    if (logorreg === "Reg") {
-      return (
-        <div>
-          <div>
-            <Button onClick={() => setLogorreg("")}>Zpět</Button>
-            <Typography variant="h4">Registrace</Typography>
-            <TextField
-              name="email"
-              label="Email"
-              variant="outlined"
-              type="email"
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              name="password"
-              label="Heslo"
-              variant="outlined"
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <br />
-            {user ? (
-              user.user.email
-            ) : (
-              <Button
-                variant="outlined"
-                onClick={() => createUser?.(email, password)}
-              >
-                Zaregistruj
-              </Button>
-            )}
-          </div>
-          <br />
-        </div>
-      );
-    }
-  }
+
   if (user) {
     const pushToDb = async () => {
       if (!isNaN(numberOfCrypto) && numberOfCrypto > 0 && isNotInFuture(dateValue)) {
@@ -234,6 +146,7 @@ export const Sidebar: React.FC = () => {
             onChange={(event, value) => setCryptoName(value)}
           />
           <TextField
+            required
             label="Počet měny"
             variant="outlined"
             type="number"
@@ -245,6 +158,7 @@ export const Sidebar: React.FC = () => {
             }}
           />
           <TextField
+            required
             id="date"
             label="Datum zakoupení"
             type="date"

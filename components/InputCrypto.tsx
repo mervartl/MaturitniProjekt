@@ -112,12 +112,10 @@ export const InputCrypto: React.FC = () => {
     }
 
 
-
-
     const div = <div>
         {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) : 
         ( user ? (<TableContainer component={Paper}>
-            <Table sx={{maxWidth: 1200, minWidth: 500}}>
+            <Table >
                 <TableHead>
                     <TableRow>
                         <TableCell align="right"></TableCell>
@@ -143,5 +141,3 @@ export const InputCrypto: React.FC = () => {
 
     return div;
 }
-
-/*dtail ? (<DetailComponent setDtail={setDtail} cid={cid} />) : user ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (<div><Button onClick={() => onButtonClick(crypto.name)}><img src={crypto.img} width="30"></img> {crypto.name} | {crypto.value} | cena je {Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</Button></div>) : <div></div>)) : <Typography variant="h3">Nejsi přihlášen!</Typography>*/
