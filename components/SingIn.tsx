@@ -36,7 +36,7 @@ const theme = createTheme({
 
 export default function SignIn() {
 
-    const { user, login, createUser, logout } = useUserContext();
+    const { user, login } = useUserContext();
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 

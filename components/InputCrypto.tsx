@@ -93,7 +93,7 @@ export const InputCrypto: React.FC = () => {
         objects.forEach(obj => {
             const existingObject = mergedObjects.find(o => o.name === obj.name);
             if (existingObject) {
-                existingObject.value = parseInt(existingObject.value) + parseInt(obj.value);
+                existingObject.value = parseFloat(existingObject.value) + parseFloat(obj.value);
             } else {
                 mergedObjects.push(obj);
             }

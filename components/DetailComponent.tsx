@@ -25,6 +25,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false"
   );
 
+
   interface Data {
     forEach(arg0: (val: any) => void): unknown;
     prices: [number, number][],
@@ -65,7 +66,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       }
     });
 
-    setSum(cryptos.reduce((acc, {value}) => acc + parseInt(value), 0));
+    setSum(cryptos.reduce((acc, {value}) => acc + parseFloat(value), 0));
   }, [cryptos]);
 
   useEffect(() => {
@@ -120,7 +121,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       })
   };
 
-  
+
   useEffect(() => {
     if (!histoData) {
       console.log("nejsou histoData");
@@ -129,6 +130,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       cryptos.map(crypto => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
+
         Object.entries(histoData).forEach(([key, value]) => {
           if (key == "prices") {
             value.forEach(val => {
@@ -166,7 +168,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
 
-  if (hPriceAssigned && sum) {
+
+  if (hPriceAssigned && sum && curPrice) {
     return (
       <div>
         <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
@@ -196,13 +199,13 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
         {cryptos.map(crypto =>
         (<Grid container columns={1} spacing={1}>
           <Grid item xs={1} textAlign="center">
-            <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený v {moment(crypto.timestamp).format("MMM Do YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
+            <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
               <Grid item xs={1} >
                 <Typography paddingTop="2%">Price for one: {Math.round(crypto.historical_price * 100) / 100} Kč</Typography>
               </Grid>
               <Grid item xs={1} >
-                <Typography>Price vlastněných total: {Math.round(crypto.historical_price * sum * 100) / 100} Kč</Typography>
+                <Typography>Price vlastněných total: {Math.round(crypto.historical_price * crypto.value * 100) / 100} Kč</Typography>
               </Grid>
               <Grid item xs={1}>
                 <Typography>Market cap: {Math.round(crypto.historical_mcap* 100) / 100} Kč</Typography>
