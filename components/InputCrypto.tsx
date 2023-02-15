@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
@@ -9,6 +9,7 @@ const Table = dynamic(() => import("@mui/material/Table"), {
 ssr: false,
 });
 import { DetailComponent } from "./DetailComponent";
+import { NumericFormat } from 'react-number-format';
 
 
 export const InputCrypto: React.FC = () => {
@@ -130,8 +131,8 @@ export const InputCrypto: React.FC = () => {
                         <TableRow key={crypto.name}>          
                             <TableCell><img src={crypto.img}alt={crypto.name}width="30"/></TableCell>       
                             <TableCell>{crypto.name}</TableCell>
-                            <TableCell>{crypto.value}</TableCell>
-                            <TableCell>{Math.round(crypto.value * crypto.current_price * 100) / 100} Kč</TableCell>
+                            <TableCell><NumericFormat value={crypto.value} displayType="text" thousandSeparator=" " decimalSeparator=","/> </TableCell>
+                            <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator=","/>  Kč</TableCell>
                             <TableCell><Button onClick={()=>onButtonClick(crypto.name)}>Detail</Button></TableCell>   
                         </TableRow>) : null)): null}
                 </TableBody>

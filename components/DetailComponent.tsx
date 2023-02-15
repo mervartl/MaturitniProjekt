@@ -2,8 +2,10 @@ import { Button, Divider, Grid, Typography } from "@mui/material";
 import axios from "axios";
 import { collection, query, onSnapshot, where, doc, deleteDoc } from "firebase/firestore";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { db } from "../firebase";
+import { NumericFormat } from 'react-number-format';
+import { green, red } from "@mui/material/colors";
 
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
@@ -24,7 +26,10 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [hisUrl, setHisUrl] = useState(
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false"
   );
+  const ref = useRef(0);
 
+  const [profitlose, setProfitlose] = useState<number>();
+  const [theme, setTheme] = useState();
 
   interface Data {
     forEach(arg0: (val: any) => void): unknown;
@@ -66,41 +71,39 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       }
     });
 
-    setSum(cryptos.reduce((acc, {value}) => acc + parseFloat(value), 0));
+    setSum(cryptos.reduce((acc, { value }) => acc + parseFloat(value), 0));
   }, [cryptos]);
 
   useEffect(() => {
-    if(urlId != null)
-    {
+    if (urlId != null) {
       setHisUrl(
         `https://api.coingecko.com/api/v3/coins/${urlId}/market_chart?vs_currency=czk&days=max&interval=daily`
       );
       setUrl(
         `https://api.coingecko.com/api/v3/coins/${urlId}?market_data=true&community_data=false&developer_data=false`
       );
-    }   
+    }
   }, [urlId]);
 
 
   const regex = /\/(?!.*undefined)(.*)\?/;
 
   useEffect(() => {
-    if(url.match(regex))
-    {
+    if (url.match(regex)) {
       axios.get(url).then((response) => {
         setCurData(response.data);
       });
-    }   
+    }
   }, [url]);
 
 
-  useEffect(()=>{
+  useEffect(() => {
     if (hisUrl.match(regex)) {
       axios.get(hisUrl).then((response) => {
         setHistoData(response.data);
       });
     }
-  },[hisUrl])
+  }, [hisUrl])
 
   useEffect(() => {
     if (!curData) return;
@@ -122,6 +125,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   };
 
 
+  
+
   useEffect(() => {
     if (!histoData) {
       console.log("nejsou histoData");
@@ -135,27 +140,27 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
           if (key == "prices") {
             value.forEach(val => {
               if (val[1] != null && val[0] == tstamp) {
-                
-                  setHPriceAssigned(true);
-                  crypto.historical_price = val[1];
+
+                setHPriceAssigned(true);
+                crypto.historical_price = val[1];
               }
             });
           }
           else if (key == "market_caps") {
             value.forEach(val => {
               if (val[1] != null && val[0] == tstamp) {
-                
-                  setHPriceAssigned(true);
-                  crypto.historical_mcap = val[1];
+
+                setHPriceAssigned(true);
+                crypto.historical_mcap = val[1];
               }
             });
           }
           else if (key == "total_volumes") {
             value.forEach(val => {
               if (val[1] != null && val[0] == tstamp) {
-                
-                  setHPriceAssigned(true);
-                  crypto.historical_tvolume = val[1];
+
+                setHPriceAssigned(true);
+                crypto.historical_tvolume = val[1];
               }
             });
           }
@@ -164,12 +169,33 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     }
   }, [histoData]);
 
+  useEffect(() => {
+    if(curPrice && sum)
+    {
+      cryptos.map(crypto => {
+        ref.current = ref.current + (crypto.value * crypto.historical_price);
+      });
+
+      setProfitlose((curPrice * sum) - ref.current); //zakladni nastrel.  pocita to nejak spatne ?? obcas se vubec neprovede a ani barvy
+    }
+
+    if(profitlose && profitlose > 0)
+    {
+      setTheme(green[500]);
+    }
+    else if(profitlose && profitlose < 0)
+    {
+      setTheme(red[900]);
+    }
+  },[hPriceAssigned]);
+
   console.log(cryptos);
+  console.log(ref.current);
 
 
 
 
-  if (hPriceAssigned && sum && curPrice) {
+  if (hPriceAssigned && sum && curPrice && ref) {
     return (
       <div>
         <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
@@ -178,21 +204,27 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
         <Typography>Celkový počet vlastněné kryptoměny: {sum}</Typography>
         <Divider />
-        <br />
-        <Grid container columns={1} spacing={1}>
+        
+        <Grid container columns={1} spacing={1} paddingTop="2%">
+          <Grid item xs={1}><Typography variant="h5" textAlign="center">Profit/Lose</Typography></Grid>
+          <Grid container columns={1} spacing={2}>
+            <Grid item xs={1}>
+              <Typography color={theme}><NumericFormat value={Math.round(curPrice * sum - ref.current * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography><Divider />
+            </Grid>
+          </Grid>
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Aktuální data</Typography></Grid>
           <Grid container columns={1} spacing={2}>
             <Grid item xs={1}>
-              <Typography paddingTop="2%">Price for one: {curPrice} Kč</Typography>
+              <Typography paddingTop="2%">Price for one: <NumericFormat value={curPrice} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1}>
-              <Typography>Price vlastněných total: {Math.round(curPrice * sum * 100) / 100} Kč</Typography>
+              <Typography>Price vlastněných total: <NumericFormat value={Math.round(curPrice * sum * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1}>
-              <Typography>Market cap: {curMCap} Kč</Typography>
+              <Typography>Market cap: <NumericFormat value={curMCap} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1}>
-              <Typography paddingBottom="2%">Total volume: {curTVolume} Kč</Typography><Divider />
+              <Typography paddingBottom="2%">Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography><Divider />
             </Grid>
           </Grid>
         </Grid>
@@ -202,16 +234,13 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
             <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
               <Grid item xs={1} >
-                <Typography paddingTop="2%">Price for one: {Math.round(crypto.historical_price * 100) / 100} Kč</Typography>
+                <Typography paddingTop="2%">Price for one v den koupě: <NumericFormat value={Math.round(crypto.historical_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
               <Grid item xs={1} >
-                <Typography>Price vlastněných total: {Math.round(crypto.historical_price * crypto.value * 100) / 100} Kč</Typography>
+                <Typography>Price vlastněných total v den koupě: <NumericFormat value={Math.round(crypto.historical_price * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
               <Grid item xs={1}>
-                <Typography>Market cap: {Math.round(crypto.historical_mcap* 100) / 100} Kč</Typography>
-              </Grid>
-              <Grid item xs={1}>
-                <Typography paddingBottom="4%">Total volume: {Math.round(crypto.historical_tvolume* 100) / 100} Kč</Typography><Divider />
+                <Typography paddingTop="2%" paddingBottom="4%">Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography><Divider />
               </Grid>
             </Grid>
           </Grid>
@@ -221,4 +250,11 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     );
   }
 };
+
+
+/*
+  <Typography>Market cap: {Math.round(crypto.historical_mcap* 100) / 100} Kč</Typography>
+
+  <Typography paddingBottom="4%">Total volume: {Math.round(crypto.historical_tvolume* 100) / 100} Kč</Typography><Divider />
+*/
 
