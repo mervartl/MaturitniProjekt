@@ -28,8 +28,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   );
   const ref = useRef(0);
 
-  const [profitlose, setProfitlose] = useState<number>();
-  const [theme, setTheme] = useState();
+  const [profitloss, setProfitloss] = useState<number>();
 
   interface Data {
     forEach(arg0: (val: any) => void): unknown;
@@ -95,6 +94,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       });
     }
   }, [url]);
+
 
 
   useEffect(() => {
@@ -169,6 +169,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     }
   }, [histoData]);
 
+
+
   useEffect(() => {
     if(curPrice && sum)
     {
@@ -176,31 +178,21 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
         ref.current = ref.current + (crypto.value * crypto.historical_price);
       });
 
-      setProfitlose((curPrice * sum) - ref.current); //zakladni nastrel.  pocita to nejak spatne ?? obcas se vubec neprovede a ani barvy
-    }
-
-    if(profitlose && profitlose > 0)
-    {
-      setTheme(green[500]);
-    }
-    else if(profitlose && profitlose < 0)
-    {
-      setTheme(red[900]);
-    }
+      setProfitloss((curPrice * sum) - ref.current);
+    }  
   },[hPriceAssigned]);
 
   console.log(cryptos);
-  console.log(ref.current);
 
 
 
 
-  if (hPriceAssigned && sum && curPrice && ref) {
+  if (hPriceAssigned && sum && curPrice && profitloss) {
     return (
       <div>
         <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
         <br />
-        <Typography variant="h3"><img src={img} height="30px"></img> {cName} <img src={img} height="30px"></img></Typography>
+        <Typography variant="h2"><img src={img} height="30px"></img> {cName} <img src={img} height="30px"></img></Typography>
 
         <Typography>Celkový počet vlastněné kryptoměny: {sum}</Typography>
         <Divider />
@@ -209,7 +201,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Profit/Lose</Typography></Grid>
           <Grid container columns={1} spacing={2}>
             <Grid item xs={1}>
-              <Typography color={theme}><NumericFormat value={Math.round(curPrice * sum - ref.current * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography><Divider />
+              <Typography color={profitloss < 0 ? red[900] : green[500]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round(profitloss * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
+              <Typography color={profitloss < 0 ? red[900] : green[500]} variant="h4" paddingBottom="2%"><NumericFormat value={Math.round(profitloss / ref.current * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography><Divider />
             </Grid>
           </Grid>
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Aktuální data</Typography></Grid>
