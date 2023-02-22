@@ -12,7 +12,7 @@ import {
   onSnapshot,
   query,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 
@@ -50,11 +50,34 @@ export const Sidebar: React.FC = () => {
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
 
-  useEffect(() => {
-    axios.get(url).then((response) => {
-      setData(response.data);
-    });
-  }, []);
+    const cachedData = useMemo(() => {
+      if (typeof window !== "undefined") {
+        const cachedItem = localStorage.getItem(url);
+        if (cachedItem) {
+          const { data, timestamp } = JSON.parse(cachedItem);
+          if (Date.now() - timestamp < 150000) {
+            return data;
+          }
+        }
+      }
+      return null;
+    }, [url]);
+  
+    useEffect(() => {
+      if (cachedData) {
+        setData(cachedData);
+      } else {
+        axios.get(url).then((response) => {
+          setData(response.data);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(
+              url,
+              JSON.stringify({ data: response.data, timestamp: Date.now() })
+            );
+          }
+        });
+      }
+    }, [url, cachedData]);
 
   useEffect(() => {
     const collectionRef = collection(db, "cryptocurrencies");

@@ -2,10 +2,11 @@ import { Button, Divider, Grid, Typography } from "@mui/material";
 import axios from "axios";
 import { collection, query, onSnapshot, where, doc, deleteDoc } from "firebase/firestore";
 import moment from "moment";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "../firebase";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
+import { isEmpty } from "@firebase/util";
 
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
@@ -87,23 +88,70 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
   const regex = /\/(?!.*undefined)(.*)\?/;
 
+
+  const cachedData = useMemo(() => {
+    const cachedItem = localStorage.getItem(url);
+    if (cachedItem) {
+      const { data, timestamp } = JSON.parse(cachedItem);
+      if (Date.now() - timestamp < 150000) {
+        return data;
+      }
+    }
+    return null;
+  }, [url]);
+
+
+  const cachedHistoData = useMemo(() => {
+    const cachedItem = localStorage.getItem(hisUrl);
+    if (cachedItem) {
+      const { data, timestamp } = JSON.parse(cachedItem);
+      if (Date.now() - timestamp < 150000) {
+        return data;
+      }
+    }
+    return null;
+  }, [hisUrl]);
+
+
+
+
+
   useEffect(() => {
     if (url.match(regex)) {
-      axios.get(url).then((response) => {
-        setCurData(response.data);
-      });
+      if (cachedData) {
+        setCurData(cachedData);
+      } else {
+        axios.get(url).then((response) => {
+          setCurData(response.data);
+          localStorage.setItem(
+            url,
+            JSON.stringify({ data: response.data, timestamp: Date.now() })
+          );
+        });
+      }
     }
-  }, [url]);
+  }, [url, cachedData]);
 
 
 
   useEffect(() => {
     if (hisUrl.match(regex)) {
-      axios.get(hisUrl).then((response) => {
-        setHistoData(response.data);
-      });
+      if (cachedHistoData) {
+        setHistoData(cachedHistoData);
+      } else {
+        axios.get(hisUrl).then((response) => {
+          setHistoData(response.data);
+          localStorage.setItem(
+            hisUrl,
+            JSON.stringify({ data: response.data, timestamp: Date.now() })
+          );
+        });
+      }
     }
-  }, [hisUrl])
+  }, [hisUrl, cachedHistoData]);
+
+
+  
 
   useEffect(() => {
     if (!curData) return;
@@ -117,6 +165,10 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     const docRef = doc(db, "cryptocurrencies", id);
     deleteDoc(docRef)
       .then(() => {
+        if (isEmpty(cryptos)) //pokud se smazou vsechny, musi to hodit zpatky na list, zatim to dela brikule
+        {
+          setDtail(false);
+        }
         console.log("Entire Document has been deleted successfully.")
       })
       .catch(error => {
@@ -183,6 +235,14 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   },[hPriceAssigned]);
 
   console.log(cryptos);
+  
+  console.log("hPriceAssigned  " + hPriceAssigned);
+
+  console.log("sum  " + sum);
+
+  console.log("curprice  " + curPrice)
+
+  console.log("profitloss  " + profitloss)
 
 
 
@@ -201,8 +261,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Profit/Lose</Typography></Grid>
           <Grid container columns={1} spacing={2}>
             <Grid item xs={1}>
-              <Typography color={profitloss < 0 ? red[900] : green[500]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round(profitloss * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
-              <Typography color={profitloss < 0 ? red[900] : green[500]} variant="h4" paddingBottom="2%"><NumericFormat value={Math.round(profitloss / ref.current * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography><Divider />
+              <Typography color={profitloss >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round(profitloss * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
+              <Typography color={profitloss >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="2%"><NumericFormat value={Math.round(profitloss / ref.current * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography><Divider />
             </Grid>
           </Grid>
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Aktuální data</Typography></Grid>

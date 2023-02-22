@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Button, Paper,  TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import dynamic from 'next/dynamic'
 const Table = dynamic(() => import("@mui/material/Table"), {
-ssr: false,
+    ssr: false,
 });
 import { DetailComponent } from "./DetailComponent";
 import { NumericFormat } from 'react-number-format';
@@ -56,14 +56,36 @@ export const InputCrypto: React.FC = () => {
     const [data, setData] = useState<DataCryptos>([]);
 
 
-    const url =
-        'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
+    const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
-    useEffect(() => {
-        axios.get(url).then((response) => {
+    const cachedData = useMemo(() => {
+        if (typeof window !== "undefined") {
+          const cachedItem = localStorage.getItem(url);
+          if (cachedItem) {
+            const { data, timestamp } = JSON.parse(cachedItem);
+            if (Date.now() - timestamp < 150000) {
+              return data;
+            }
+          }
+        }
+        return null;
+      }, [url]);
+    
+      useEffect(() => {
+        if (cachedData) {
+          setData(cachedData);
+        } else {
+          axios.get(url).then((response) => {
             setData(response.data);
-        });
-    }, [url]);
+            if (typeof window !== "undefined") {
+              localStorage.setItem(
+                url,
+                JSON.stringify({ data: response.data, timestamp: Date.now() })
+              );
+            }
+          });
+        }
+      }, [url, cachedData]);
 
     useEffect(() => {
         const collectionRef = collection(db, "cryptocurrencies")
@@ -114,30 +136,30 @@ export const InputCrypto: React.FC = () => {
 
 
     const div = <div>
-        {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) : 
-        ( user ? (<TableContainer component={Paper}>
-            <Table >
-                <TableHead>
-                    <TableRow>
-                        <TableCell align="right"></TableCell>
-                        <TableCell>Název měny</TableCell>
-                        <TableCell>Zakoupený počet měny</TableCell>
-                        <TableCell>Momentální price</TableCell>
-                        <TableCell>Detail měny</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {user && cryptoObj ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (
-                        <TableRow key={crypto.name}>          
-                            <TableCell><img src={crypto.img}alt={crypto.name}width="30"/></TableCell>       
-                            <TableCell>{crypto.name}</TableCell>
-                            <TableCell><NumericFormat value={crypto.value} displayType="text" thousandSeparator=" " decimalSeparator=","/> </TableCell>
-                            <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator=","/>  Kč</TableCell>
-                            <TableCell><Button onClick={()=>onButtonClick(crypto.name)}>Detail</Button></TableCell>   
-                        </TableRow>) : null)): null}
-                </TableBody>
-            </Table>
-        </TableContainer>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
+        {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
+            (user ? (<TableContainer component={Paper}>
+                <Table >
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="right"></TableCell>
+                            <TableCell>Název měny</TableCell>
+                            <TableCell>Zakoupený počet měny</TableCell>
+                            <TableCell>Momentální price</TableCell>
+                            <TableCell>Detail měny</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {user && cryptoObj ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (
+                            <TableRow key={crypto.name}>
+                                <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
+                                <TableCell>{crypto.name}</TableCell>
+                                <TableCell><NumericFormat value={crypto.value} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
+                                <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
+                                <TableCell><Button onClick={() => onButtonClick(crypto.name)}>Detail</Button></TableCell>
+                            </TableRow>) : null)) : null}
+                    </TableBody>
+                </Table>
+            </TableContainer>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
     </div>
 
     return div;
