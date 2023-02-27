@@ -163,6 +163,7 @@ export const Sidebar: React.FC = () => {
           <Autocomplete
             id="aucomp"
             options={listItems}
+            autoComplete={true}
             renderInput={(params) => (
               <TextField {...params} label="Kryptoměny" />
             )}

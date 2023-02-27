@@ -143,8 +143,9 @@ export const InputCrypto: React.FC = () => {
                         <TableRow>
                             <TableCell align="right"></TableCell>
                             <TableCell>Název měny</TableCell>
-                            <TableCell>Zakoupený počet měny</TableCell>
-                            <TableCell>Momentální price</TableCell>
+                            <TableCell>Počet</TableCell>
+                            <TableCell>Price</TableCell>
+                            <TableCell>Total</TableCell>
                             <TableCell>Detail měny</TableCell>
                         </TableRow>
                     </TableHead>
@@ -154,6 +155,7 @@ export const InputCrypto: React.FC = () => {
                                 <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
                                 <TableCell>{crypto.name}</TableCell>
                                 <TableCell><NumericFormat value={crypto.value} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
+                                <TableCell><NumericFormat value={Math.round(crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
                                 <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
                                 <TableCell><Button onClick={() => onButtonClick(crypto.name)}>Detail</Button></TableCell>
                             </TableRow>) : null)) : null}
