@@ -3,13 +3,14 @@ import { collection, onSnapshot, query } from "@firebase/firestore";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import axios from "axios";
-import { Button, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Button, Divider, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import dynamic from 'next/dynamic'
 const Table = dynamic(() => import("@mui/material/Table"), {
     ssr: false,
 });
 import { DetailComponent } from "./DetailComponent";
 import { NumericFormat } from 'react-number-format';
+import { green, red } from "@mui/material/colors";
 
 
 export const InputCrypto: React.FC = () => {
@@ -54,7 +55,13 @@ export const InputCrypto: React.FC = () => {
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
     const [data, setData] = useState<DataCryptos>([]);
-
+    const [cryptoSum, setCryptoSum] = useState(0);
+    const [cryptoObj, setCryptoObj] = useState<any>();
+    const [histoCryptoSum, setHistoCryptoSum] = useState(0);
+    const [cName, setCName] = useState<string>();
+    const [dtail, setDtail] = useState(false);
+    const [profitloss, setProfitloss] = useState<number>();
+    const [histoCryptoReady, setHistoCryptoReady] = useState(false);
 
     const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
@@ -96,6 +103,48 @@ export const InputCrypto: React.FC = () => {
         return unsubscribe;
     }, [])
 
+
+
+
+    const histoDataCache = useMemo(() => ({}), []);
+
+    useEffect(() => {
+        if (cryptos) {
+            cryptos.forEach(crypto => {
+                const hisUrl = `https://api.coingecko.com/api/v3/coins/${crypto.nameId}/market_chart?vs_currency=czk&days=max&interval=daily`;
+
+                if (histoDataCache[hisUrl]) {
+                    const histoData = histoDataCache[hisUrl];
+                    updateCryptoHistoricalPrice(crypto, histoData);
+                } else {
+                    axios.get(hisUrl).then(response => {
+                        const histoData = response.data;
+                        if (histoData) {
+                            histoDataCache[hisUrl] = histoData;
+                            updateCryptoHistoricalPrice(crypto, histoData);
+                        }
+                    });
+                }
+            });
+        }
+    }, [cryptos, histoDataCache]);
+
+    const updateCryptoHistoricalPrice = (crypto, histoData) => {
+        const date = new Date(crypto.timestamp);
+        const tstamp = date.getTime();
+
+        Object.entries(histoData).forEach(([key, value]) => {
+            if (key === "prices") {
+                value.forEach(val => {
+                    if (val[1] !== null && val[0] === tstamp) {
+                        crypto.historical_price = val[1];
+                    }
+                });
+            }
+        });
+        setHistoCryptoReady(true);
+    }
+
     cryptos.forEach(crypto => {
         data.forEach(dat => {
             if (crypto.symbol == dat.symbol) {
@@ -104,7 +153,6 @@ export const InputCrypto: React.FC = () => {
         });
     });
 
-    const [cryptoObj, setCryptoObj] = useState();
 
     useEffect(() => {
         setCryptoObj(mergeOb(cryptos));
@@ -112,41 +160,70 @@ export const InputCrypto: React.FC = () => {
 
     const mergeOb = (objects: DBCryptos) => {
         const mergedObjects: MergedCryptos = [];
-
+      
         objects.forEach(obj => {
-            const existingObject = mergedObjects.find(o => o.name === obj.name);
-            if (existingObject) {
-                existingObject.value = parseFloat(existingObject.value) + parseFloat(obj.value);
-            } else {
-                mergedObjects.push(obj);
-            }
+          const existingObject = mergedObjects.find(o => o.name === obj.name);
+          if (existingObject) {
+            existingObject.value = Number(existingObject.value) + Number(obj.value);
+          } else {
+            mergedObjects.push({ ...obj });
+          }
         });
-
+      
         return mergedObjects;
-    }
+      }
 
 
-    const [cName, setCName] = useState<string>();
-    const [dtail, setDtail] = useState(false);
+    useEffect(() => {
+        if(cryptoObj)
+        {
+            setCryptoSum(cryptoObj.reduce((acc, crypto) => acc + crypto.value * crypto.current_price, 0));
+        }  
+    },[cryptoObj]);
+
+
+    useEffect(()=>{
+        if(histoCryptoReady)
+        {
+            setHistoCryptoSum(cryptos.reduce((acc, crypto) => acc + crypto.value * crypto.historical_price, 0));
+        }
+    },[histoCryptoReady]);
+
+    useEffect(()=>{
+        if(histoCryptoSum)
+        {
+            setProfitloss(cryptoSum - histoCryptoSum);
+            console.log(cryptoSum);
+            console.log(histoCryptoSum);
+        }
+    },[histoCryptoSum]);
+    
 
     const onButtonClick = (name: string) => {
         setCName(name);
         setDtail(true);
     }
-
+    
+    
+    //console.log(profitloss);
 
     const div = <div>
         {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
-            (user ? (<TableContainer component={Paper}>
-                <Table >
+            (user ? (
+            <div>
+            <Typography display="inline" variant="h4">Celkový P/L: </Typography>
+            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss * 100) / 100} Kč </Typography>
+            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss / histoCryptoSum * 100 * 100) / 100}%</Typography><Divider sx={{paddingBottom: "2%"}}/>
+            <TableContainer component={Paper}>
+                <Table>
                     <TableHead>
                         <TableRow>
                             <TableCell align="right"></TableCell>
-                            <TableCell>Název měny</TableCell>
-                            <TableCell>Počet</TableCell>
-                            <TableCell>Price</TableCell>
-                            <TableCell>Total</TableCell>
-                            <TableCell>Detail měny</TableCell>
+                            <TableCell><Typography><strong>Název</strong></Typography></TableCell>
+                            <TableCell><Typography><strong>Počet</strong></Typography></TableCell>
+                            <TableCell><Typography><strong>Price</strong></Typography></TableCell>
+                            <TableCell><Typography><strong>Total</strong></Typography></TableCell>
+                            <TableCell><Typography><strong>Detail</strong></Typography></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -161,7 +238,7 @@ export const InputCrypto: React.FC = () => {
                             </TableRow>) : null)) : null}
                     </TableBody>
                 </Table>
-            </TableContainer>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
+            </TableContainer></div>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
     </div>
 
     return div;

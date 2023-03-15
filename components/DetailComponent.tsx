@@ -11,7 +11,7 @@ import { isEmpty } from "@firebase/util";
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
   const [histoData, setHistoData] = useState<Data[]>();
-  const [curData, setCurData] = useState();
+  const [curData, setCurData] = useState<any | null>();
   const [sum, setSum] = useState<number>();
 
   const [curPrice, setCurPrice] = useState(null);
@@ -50,6 +50,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     timestamp: string;
     nameId: string;
   };
+
 
   useEffect(() => {
     const collectionRef = collection(db, "cryptocurrencies");
@@ -151,8 +152,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   }, [hisUrl, cachedHistoData]);
 
 
-  
-
   useEffect(() => {
     if (!curData) return;
     setCurPrice(curData.market_data.current_price["czk"]);
@@ -177,14 +176,14 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   };
 
 
-  
+
 
   useEffect(() => {
     if (!histoData) {
       console.log("nejsou histoData");
     }
     else {
-      cryptos.map(crypto => {
+      cryptos.forEach(crypto => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
 
@@ -224,18 +223,19 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
   useEffect(() => {
-    if(curPrice && sum)
-    {
-      cryptos.map(crypto => {
+    if (curPrice && sum && hPriceAssigned) {
+      cryptos.forEach(crypto => {
         ref.current = ref.current + (crypto.value * crypto.historical_price);
       });
 
       setProfitloss((curPrice * sum) - ref.current);
-    }  
-  },[hPriceAssigned]);
+    }
+  }, [hPriceAssigned]);
+
+
 
   console.log(cryptos);
-  
+
   console.log("hPriceAssigned  " + hPriceAssigned);
 
   console.log("sum  " + sum);
@@ -247,16 +247,17 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
 
+  const back = <><Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
+    <br /></>;
   if (hPriceAssigned && sum && curPrice && profitloss) {
     return (
       <div>
-        <Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
-        <br />
+        {back}
         <Typography variant="h2"><img src={img} height="30px"></img> {cName} <img src={img} height="30px"></img></Typography>
 
         <Typography>Celkový počet vlastněné kryptoměny: {sum}</Typography>
         <Divider />
-        
+
         <Grid container columns={1} spacing={1} paddingTop="2%">
           <Grid item xs={1}><Typography variant="h5" textAlign="center">Profit/Lose</Typography></Grid>
           <Grid container columns={1} spacing={2}>
@@ -302,12 +303,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       </div>
     );
   }
+  else {
+    return back;
+  }
 };
-
-
-/*
-  <Typography>Market cap: {Math.round(crypto.historical_mcap* 100) / 100} Kč</Typography>
-
-  <Typography paddingBottom="4%">Total volume: {Math.round(crypto.historical_tvolume* 100) / 100} Kč</Typography><Divider />
-*/
 

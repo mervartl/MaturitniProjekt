@@ -1,25 +1,18 @@
-import {
-  Autocomplete,
-  Button,
-  Stack,
-  TextField,
-  Typography,
-} from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
+import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import axios from "axios";
-import {
-  addDoc,
-  collection,
-  onSnapshot,
-  query,
-} from "firebase/firestore";
+import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
 import { useEffect, useMemo, useState } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 
 export const Sidebar: React.FC = () => {
-  const [data, setData] = useState<DataCryptos>([]);
-  const [listItems, setListItems] = useState<Array<Listt>>([]); // useneco({ skip: !user})
-
+  const [listItems, setListItems] = useState<string[]>([]);
+  const [data, setData] = useState<any[]>([]);
+  const [cryptos, setCryptos] = useState<any[]>([]);
   const { user } = useUserContext();
   const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
   const [cryptoName, setCryptoName] = useState<string>();
@@ -28,60 +21,39 @@ export const Sidebar: React.FC = () => {
   const [cryptoImg, setCryptoImg] = useState("");
   const [cryptoNameId, setCryptoNameId] = useState("");
 
-  const [cryptos, setCryptos] = useState<DBCryptos>([]);
-
-  type Listt = {
-    name: string;
-  };
-
-  type DataCryptos = {
-    map(arg0: (dat: any) => void): unknown;
-    symbol: string;
-    name: string;
-  };
-
-  type DBCryptos = {
-    //data z databaze
-    map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
-    id: string;
-    name: string;
-  };
-
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
 
-    const cachedData = useMemo(() => {
-      if (typeof window !== "undefined") {
-        const cachedItem = localStorage.getItem(url);
-        if (cachedItem) {
-          const { data, timestamp } = JSON.parse(cachedItem);
-          if (Date.now() - timestamp < 150000) {
-            return data;
-          }
+  const getCachedData = useMemo(() => {
+    const cachedItem = typeof window !== "undefined" ? localStorage.getItem(url) : null;
+    if (cachedItem) {
+      const { data, timestamp } = JSON.parse(cachedItem);
+      if (Date.now() - timestamp < 150000) {
+        return data;
+      }
+    }
+    return null;
+  }, [url]);
+
+  useEffect(() => {
+    if (getCachedData) {
+      setData(getCachedData);
+    } else {
+      axios.get(url).then((response) => {
+        setData(response.data);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(
+            url,
+            JSON.stringify({ data: response.data, timestamp: Date.now() })
+          );
         }
-      }
-      return null;
-    }, [url]);
-  
-    useEffect(() => {
-      if (cachedData) {
-        setData(cachedData);
-      } else {
-        axios.get(url).then((response) => {
-          setData(response.data);
-          if (typeof window !== "undefined") {
-            localStorage.setItem(
-              url,
-              JSON.stringify({ data: response.data, timestamp: Date.now() })
-            );
-          }
-        });
-      }
-    }, [url, cachedData]);
+      });
+    }
+  }, [url, getCachedData]);
 
   useEffect(() => {
     const collectionRef = collection(db, "cryptocurrencies");
-    const q = query(collectionRef); //, orderBy("value")
+    const q = query(collectionRef);
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setCryptos(
         querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
@@ -91,65 +63,53 @@ export const Sidebar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    //vykonana se vicekrat [data] nebo vubec [cokoliv]
-    data.map((dat) => {
-      listItems.push(dat.name);
-      console.log("data se pushli");
-    });
+    const items = data.map((d: any) => d.name);
+    setListItems(items);
   }, [data]);
 
   useEffect(() => {
-    data.map((dat) => {
-      if (cryptoName == dat.name) {
-        setCryptoSymbol(dat.symbol);
-        setCryptoImg(dat.image);
-        setCryptoNameId(dat.id);
-      }
-    });
-  }, [cryptoName]);
+    const selectedCrypto = data.find((d) => d.name === cryptoName);
+    if (selectedCrypto) {
+      setCryptoSymbol(selectedCrypto.symbol);
+      setCryptoImg(selectedCrypto.image);
+      setCryptoNameId(selectedCrypto.id);
+    }
+  }, [cryptoName, data]);
 
-  const onSubmit = (e: any) => {
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
   };
 
   const isNotInFuture = (dateValue: string) => {
-    if (dateValue != null && dateValue != "") {
+    if (dateValue !== null && dateValue !== "") {
       const inputDate = new Date(dateValue);
       const now = new Date();
+      return inputDate <= now;
+    }
+    return false;
+  };
 
-      if (inputDate > now) {
-        console.log("Datum je v budoucnu");
-        return false;
-      } else {
-        return true;
-      }
+  const isPositiveNumber = (value: number) => {
+    return !isNaN(value) && value > 0;
+  };
+
+  const pushToDb = async () => {
+    if (numberOfCrypto && isPositiveNumber(numberOfCrypto) && isNotInFuture(dateValue)) {
+      const docRef = await addDoc(collection(db, "cryptocurrencies"), {
+        img: cryptoImg,
+        name: cryptoName,
+        symbol: cryptoSymbol,
+        timestamp: dateValue,
+        userId: user?.user?.uid,
+        value: numberOfCrypto,
+        nameId: cryptoNameId,
+      });
+    } else {
+      console.log("Value is not a positive number or date is in the future.");
     }
   };
 
-  const div = (
-    <div>
-    </div>
-  );
-
   if (user) {
-    const pushToDb = async () => {
-      if (!isNaN(numberOfCrypto) && numberOfCrypto > 0 && isNotInFuture(dateValue)) {
-
-        const docRef = await addDoc(collection(db, "cryptocurrencies"), {
-          img: cryptoImg,
-          name: cryptoName,
-          symbol: cryptoSymbol,
-          timestamp: dateValue,
-          userId: user.user.uid,
-          value: numberOfCrypto,
-          nameId: cryptoNameId,
-        });
-
-      } else {
-        console.log("value neni cislo nebo je zaporne nebo nula nebo je datum v budoucnu");
-      }
-    };
-
     return (
       <div>
         <br />
@@ -167,18 +127,17 @@ export const Sidebar: React.FC = () => {
             renderInput={(params) => (
               <TextField {...params} label="Kryptoměny" />
             )}
-            onChange={(event, value) => setCryptoName(value)}
+            onChange={(event, value) => setCryptoName(value ?? undefined)}
           />
           <TextField
             required
             label="Počet měny"
             variant="outlined"
             type="number"
-            onChange={(e) => setNumberOfCrypto(e.target.value)}
-            
+            onChange={(e) => setNumberOfCrypto(Number(e.target.value))}
             inputProps={{
               step: "0.00001",
-              min: "0.00001"
+              min: "0.00001",
             }}
           />
           <TextField
@@ -202,5 +161,7 @@ export const Sidebar: React.FC = () => {
         </Stack>
       </div>
     );
-  } else return div;
+  } else {
+    return null;
+  }
 };

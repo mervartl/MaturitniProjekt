@@ -18,7 +18,7 @@ const Home: NextPage = () => {
         <Grid container columns={12} spacing={2} >
           <Grid item md={3} lg={2.5} xs={12} textAlign="center" marginTop="1.5%" paddingRight="3%"><LogReg /></Grid>
           <Grid item md={9} lg={9.5} xs={12} textAlign="center" marginTop="1%">
-            <Typography variant="h3" textAlign="center">
+            <Typography variant="h3" textAlign="center" paddingBottom="2.5%">
               CRYPTOLIUM
             </Typography>
           </Grid>
