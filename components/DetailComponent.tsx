@@ -7,6 +7,7 @@ import { db } from "../firebase";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
 import { isEmpty } from "@firebase/util";
+import { CryptoChart } from "./Chart";
 
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
@@ -118,11 +119,16 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
   useEffect(() => {
+    getCurData();
+  }, [url, cachedData]);
+
+  const getCurData = async () => {
     if (url.match(regex)) {
       if (cachedData) {
         setCurData(cachedData);
       } else {
-        axios.get(url).then((response) => {
+        console.log("necuzuuunmdasfdsf");
+        await axios.get(url).then((response) => {
           setCurData(response.data);
           localStorage.setItem(
             url,
@@ -130,9 +136,24 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
           );
         });
       }
+      if(curData)
+      {
+      setCurPrice(curData.market_data.current_price["czk"]);
+      setCurMCap(curData.market_data.market_cap["czk"]);
+      setCurTVolume(curData.market_data.total_volume["czk"]);  
+      }
+                 
     }
-  }, [url, cachedData]);
+  };
 
+
+  useEffect(() => {
+    if (curData) {
+      setCurPrice(curData.market_data.current_price["czk"]);
+      setCurMCap(curData.market_data.market_cap["czk"]);
+      setCurTVolume(curData.market_data.total_volume["czk"]);  
+    }
+  }, [curData]);
 
 
   useEffect(() => {
@@ -152,14 +173,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   }, [hisUrl, cachedHistoData]);
 
 
-  useEffect(() => {
-    if (!curData) return;
-    setCurPrice(curData.market_data.current_price["czk"]);
-    setCurMCap(curData.market_data.market_cap["czk"]);
-    setCurTVolume(curData.market_data.total_volume["czk"]);
-  }, [curData]);
-
-
   const deleteFromDb = async (id: string) => {
     const docRef = doc(db, "cryptocurrencies", id);
     deleteDoc(docRef)
@@ -168,7 +181,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
         {
           setDtail(false);
         }
-        console.log("Entire Document has been deleted successfully.")
+        console.log("Kryptoměny byla odstraněna");
       })
       .catch(error => {
         console.log(error);
@@ -223,28 +236,25 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
   useEffect(() => {
-    if (curPrice && sum && hPriceAssigned) {
+    console.log("curpice " + curPrice);
+
+    getCurData();
+
+    console.log("curpice " + curPrice);
+
+    if (sum && hPriceAssigned && curPrice) {
       cryptos.forEach(crypto => {
         ref.current = ref.current + (crypto.value * crypto.historical_price);
       });
 
       setProfitloss((curPrice * sum) - ref.current);
     }
-  }, [hPriceAssigned]);
 
 
+  }, [hPriceAssigned, curPrice]);
 
-  console.log(cryptos);
-
-  console.log("hPriceAssigned  " + hPriceAssigned);
-
-  console.log("sum  " + sum);
-
-  console.log("curprice  " + curPrice)
-
-  console.log("profitloss  " + profitloss)
-
-
+  console.log("profitloss " + profitloss);
+  
 
 
   const back = <><Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
@@ -281,7 +291,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
               <Typography paddingBottom="2%">Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography><Divider />
             </Grid>
           </Grid>
-        </Grid>
+        </Grid>   
         {cryptos.map(crypto =>
         (<Grid container columns={1} spacing={1}>
           <Grid item xs={1} textAlign="center">
@@ -295,6 +305,9 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
               </Grid>
               <Grid item xs={1}>
                 <Typography paddingTop="2%" paddingBottom="4%">Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography><Divider />
+              </Grid>
+              <Grid>
+                <CryptoChart data={histoData}/>
               </Grid>
             </Grid>
           </Grid>

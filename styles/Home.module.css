@@ -130,3 +130,12 @@
     filter: invert(1);
   }
 }
+
+.chartContainer {
+  display: flex;
+  justify-content: center;
+}
+
+.chartWrapper {
+  position: relative;
+}

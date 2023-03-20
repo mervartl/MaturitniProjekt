@@ -57,7 +57,7 @@ export const InputCrypto: React.FC = () => {
     const [data, setData] = useState<DataCryptos>([]);
     const [cryptoSum, setCryptoSum] = useState(0);
     const [cryptoObj, setCryptoObj] = useState<any>();
-    const [histoCryptoSum, setHistoCryptoSum] = useState(0);
+    const [histoCryptoSum, setHistoCryptoSum] = useState();
     const [cName, setCName] = useState<string>();
     const [dtail, setDtail] = useState(false);
     const [profitloss, setProfitloss] = useState<number>();
@@ -109,6 +109,11 @@ export const InputCrypto: React.FC = () => {
     const histoDataCache = useMemo(() => ({}), []);
 
     useEffect(() => {
+        getCrypto();
+    }, [cryptos, histoDataCache]);
+
+
+    const getCrypto = () => {
         if (cryptos) {
             cryptos.forEach(crypto => {
                 const hisUrl = `https://api.coingecko.com/api/v3/coins/${crypto.nameId}/market_chart?vs_currency=czk&days=max&interval=daily`;
@@ -127,15 +132,15 @@ export const InputCrypto: React.FC = () => {
                 }
             });
         }
-    }, [cryptos, histoDataCache]);
+    };
 
-    const updateCryptoHistoricalPrice = (crypto, histoData) => {
+    const updateCryptoHistoricalPrice = (crypto: any, histoData: any) => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
 
         Object.entries(histoData).forEach(([key, value]) => {
             if (key === "prices") {
-                value.forEach(val => {
+                value.forEach((val: any[]) => {
                     if (val[1] !== null && val[0] === tstamp) {
                         crypto.historical_price = val[1];
                     }
@@ -177,35 +182,36 @@ export const InputCrypto: React.FC = () => {
     useEffect(() => {
         if(cryptoObj)
         {
-            setCryptoSum(cryptoObj.reduce((acc, crypto) => acc + crypto.value * crypto.current_price, 0));
+            setCryptoSum(cryptoObj.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0));
         }  
     },[cryptoObj]);
 
 
-    useEffect(()=>{
-        if(histoCryptoReady)
-        {
-            setHistoCryptoSum(cryptos.reduce((acc, crypto) => acc + crypto.value * crypto.historical_price, 0));
-        }
-    },[histoCryptoReady]);
+    useEffect(() => {
+        console.log(histoCryptoReady)
+
+        getCrypto();
+
+        console.log(cryptos);
+        setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+    }, [histoCryptoReady]);
 
     useEffect(()=>{
+        console.log(histoCryptoSum);
         if(histoCryptoSum)
         {
             setProfitloss(cryptoSum - histoCryptoSum);
-            console.log(cryptoSum);
-            console.log(histoCryptoSum);
+            console.log("hoo");
         }
     },[histoCryptoSum]);
+    
     
 
     const onButtonClick = (name: string) => {
         setCName(name);
         setDtail(true);
     }
-    
-    
-    //console.log(profitloss);
+
 
     const div = <div>
         {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
