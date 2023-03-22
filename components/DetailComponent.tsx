@@ -7,7 +7,8 @@ import { db } from "../firebase";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
 import { isEmpty } from "@firebase/util";
-import { CryptoChart } from "./Chart";
+import { HistoricChart } from "./HistoricChart";
+import { Chart } from "./Chart";
 
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
@@ -127,7 +128,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
       if (cachedData) {
         setCurData(cachedData);
       } else {
-        console.log("necuzuuunmdasfdsf");
         await axios.get(url).then((response) => {
           setCurData(response.data);
           localStorage.setItem(
@@ -236,12 +236,6 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
 
   useEffect(() => {
-    console.log("curpice " + curPrice);
-
-    getCurData();
-
-    console.log("curpice " + curPrice);
-
     if (sum && hPriceAssigned && curPrice) {
       cryptos.forEach(crypto => {
         ref.current = ref.current + (crypto.value * crypto.historical_price);
@@ -249,12 +243,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
 
       setProfitloss((curPrice * sum) - ref.current);
     }
-
-
   }, [hPriceAssigned, curPrice]);
-
-  console.log("profitloss " + profitloss);
-  
 
 
   const back = <><Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
@@ -269,7 +258,7 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
         <Divider />
 
         <Grid container columns={1} spacing={1} paddingTop="2%">
-          <Grid item xs={1}><Typography variant="h5" textAlign="center">Profit/Lose</Typography></Grid>
+          <Grid item xs={1}><Typography variant="h5" textAlign="center">Celkový Profit/Lose</Typography></Grid>
           <Grid container columns={1} spacing={2}>
             <Grid item xs={1}>
               <Typography color={profitloss >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round(profitloss * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
@@ -288,26 +277,34 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
               <Typography>Market cap: <NumericFormat value={curMCap} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1}>
-              <Typography paddingBottom="2%">Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography><Divider />
+              <Typography>Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
+            </Grid>
+            <Grid item xs={1} paddingBottom="2%">
+              <Chart data={histoData.prices} profitloss={profitloss}/><Divider />
             </Grid>
           </Grid>
         </Grid>   
         {cryptos.map(crypto =>
         (<Grid container columns={1} spacing={1}>
           <Grid item xs={1} textAlign="center">
-            <Typography variant="h5" paddingTop="2%">{crypto.value} {cName} koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
+            <Typography variant="h5" paddingTop="2%" >{crypto.value} {cName} <img src={img} height="20px"></img> koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
-              <Grid item xs={1} >
-                <Typography paddingTop="2%">Price for one v den koupě: <NumericFormat value={Math.round(crypto.historical_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
+              <Grid item xs={1}>
+              <Typography variant="h5" textAlign="center">Profit/Lose</Typography>
+                <Typography color={(curPrice * crypto.value - crypto.historical_price * crypto.value) >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round((curPrice * crypto.value - crypto.historical_price * crypto.value) * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
+                <Typography color={(curPrice * crypto.value - crypto.historical_price * crypto.value) >= 0 ? green[500] : red[900]} variant="h4"><NumericFormat value={Math.round((curPrice * crypto.value - crypto.historical_price * crypto.value) / (crypto.value * crypto.historical_price) * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography>
+              </Grid>
+              <Grid item xs={1}>
+                <Typography paddingTop="1%">Price for one v den koupě: <NumericFormat value={Math.round(crypto.historical_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
               <Grid item xs={1} >
                 <Typography>Price vlastněných total v den koupě: <NumericFormat value={Math.round(crypto.historical_price * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
-              <Grid item xs={1}>
-                <Typography paddingTop="2%" paddingBottom="4%">Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography><Divider />
+              <Grid item xs={1} paddingTop="2%">
+                <Typography>Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
-              <Grid>
-                <CryptoChart data={histoData}/>
+              <Grid item xs={1} paddingBottom="4%">
+                <HistoricChart data={histoData.prices} timestamp={crypto.timestamp} profitloss={(curPrice * crypto.value - crypto.historical_price * crypto.value)}/><Divider />
               </Grid>
             </Grid>
           </Grid>

@@ -55,13 +55,12 @@ export const InputCrypto: React.FC = () => {
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<DBCryptos>([]);
     const [data, setData] = useState<DataCryptos>([]);
-    const [cryptoSum, setCryptoSum] = useState(0);
+    const [cryptoSum, setCryptoSum] = useState<number>(0);
     const [cryptoObj, setCryptoObj] = useState<any>();
-    const [histoCryptoSum, setHistoCryptoSum] = useState();
+    const [histoCryptoSum, setHistoCryptoSum] = useState<number>(0);
     const [cName, setCName] = useState<string>();
     const [dtail, setDtail] = useState(false);
-    const [profitloss, setProfitloss] = useState<number>();
-    const [histoCryptoReady, setHistoCryptoReady] = useState(false);
+    const [profitloss, setProfitloss] = useState<number>(0);
 
     const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
@@ -70,7 +69,7 @@ export const InputCrypto: React.FC = () => {
           const cachedItem = localStorage.getItem(url);
           if (cachedItem) {
             const { data, timestamp } = JSON.parse(cachedItem);
-            if (Date.now() - timestamp < 150000) {
+            if (Date.now() - timestamp < 15000) {
               return data;
             }
           }
@@ -109,7 +108,10 @@ export const InputCrypto: React.FC = () => {
     const histoDataCache = useMemo(() => ({}), []);
 
     useEffect(() => {
-        getCrypto();
+        if(cryptos)
+        {
+            getCrypto();
+        }
     }, [cryptos, histoDataCache]);
 
 
@@ -121,12 +123,20 @@ export const InputCrypto: React.FC = () => {
                 if (histoDataCache[hisUrl]) {
                     const histoData = histoDataCache[hisUrl];
                     updateCryptoHistoricalPrice(crypto, histoData);
+                    console.log(crypto);
+                    console.log("prvni" , histoCryptoSum);
+                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+                    console.log("druhy", histoCryptoSum);
                 } else {
                     axios.get(hisUrl).then(response => {
                         const histoData = response.data;
                         if (histoData) {
                             histoDataCache[hisUrl] = histoData;
                             updateCryptoHistoricalPrice(crypto, histoData);
+                            console.log(crypto);
+                            console.log("prvni" , histoCryptoSum);
+                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+                            console.log("druhy", histoCryptoSum);
                         }
                     });
                 }
@@ -147,7 +157,6 @@ export const InputCrypto: React.FC = () => {
                 });
             }
         });
-        setHistoCryptoReady(true);
     }
 
     cryptos.forEach(crypto => {
@@ -187,21 +196,11 @@ export const InputCrypto: React.FC = () => {
     },[cryptoObj]);
 
 
-    useEffect(() => {
-        console.log(histoCryptoReady)
-
-        getCrypto();
-
-        console.log(cryptos);
-        setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
-    }, [histoCryptoReady]);
-
     useEffect(()=>{
         console.log(histoCryptoSum);
         if(histoCryptoSum)
         {
             setProfitloss(cryptoSum - histoCryptoSum);
-            console.log("hoo");
         }
     },[histoCryptoSum]);
     

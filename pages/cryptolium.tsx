@@ -31,7 +31,6 @@ const Home: NextPage = () => {
           <Grid container columns={12} spacing={2}>
             <Grid item xs={12} textAlign="center">
               <Typography variant="body2" color="text.secondary" align="center">
-                {'Copyright © '}
                 <Link color="inherit" href="https://delta-skola.cz/">
                   Lukáš Mervart
                 </Link>{' '}
