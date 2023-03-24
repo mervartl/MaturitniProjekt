@@ -135,18 +135,37 @@ export const Sidebar: React.FC = () => {
           options={listItems}
           autoComplete={true}
           renderInput={(params) => (
-            <TextField {...params} label="Kryptoměny" />
+            <TextField
+              {...params}
+              label="Kryptoměny"
+              InputProps={{
+                ...params.InputProps,
+                startAdornment: (
+                  <>
+                    {cryptoName && (
+                      <img
+                        src={listItems.find((item) => item.name === cryptoName).img}
+                        alt={cryptoName}
+                        style={{ width: "25px", marginRight: "8px" }}
+                      />
+                    )}
+                    {params.InputProps.startAdornment}
+                  </>
+                ),
+              }}
+            />
           )}
-          getOptionLabel={(option) => (
-            <React.Fragment>
+          renderOption={(props, option) => (
+            <li {...props}>
               <img
                 src={option.img}
                 alt={option.name}
                 style={{ width: "25px", marginRight: "8px" }}
               />
               {option.name}
-            </React.Fragment>
+            </li>
           )}
+          getOptionLabel={(option) => option.name}
           onChange={(event, value) => setCryptoName(value?.name ?? undefined)}
         />
         <TextField

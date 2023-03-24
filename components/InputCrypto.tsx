@@ -217,7 +217,7 @@ export const InputCrypto: React.FC = () => {
             (user ? (
             <div>
             <Typography display="inline" variant="h4">Celkový P/L: </Typography>
-            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss * 100) / 100} Kč </Typography>
+            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{profitloss > 0 ? "+" : ""}{Math.round(profitloss * 100) / 100} Kč </Typography>
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss / histoCryptoSum * 100 * 100) / 100}%</Typography><Divider sx={{paddingBottom: "2%"}}/>
             <TableContainer component={Paper}>
                 <Table>
@@ -236,9 +236,9 @@ export const InputCrypto: React.FC = () => {
                             <TableRow key={crypto.name}>
                                 <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
                                 <TableCell>{crypto.name}</TableCell>
-                                <TableCell><NumericFormat value={crypto.value} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
+                                <TableCell><NumericFormat value={parseFloat(crypto.value)} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
                                 <TableCell><NumericFormat value={Math.round(crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
-                                <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
+                                <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price) * 100 / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
                                 <TableCell><Button onClick={() => onButtonClick(crypto.name)}>Detail</Button></TableCell>
                             </TableRow>) : null)) : null}
                     </TableBody>

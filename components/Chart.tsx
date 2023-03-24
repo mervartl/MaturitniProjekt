@@ -4,31 +4,27 @@ import styles from '../styles/Home.module.css';
 import { green, red} from "@mui/material/colors";
 
 export const Chart: React.FC = ({ data, profitloss }) => {
-  const [chartData, setChartData] = useState();
+  const [chartData, setChartData] = useState<{ time: number; value: number }[]>();
   const [lineColor, setLineColor] = useState<string>();
 
-  const chartRef = useRef();
-  const chartInstanceRef = useRef();
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstanceRef = useRef<any>();
 
   useEffect(() => {
-    if(data)
-    {
+    if (data) {
       setChartData(data.map(([time, value]) => ({ time: time / 1000, value })));
     }
 
-    if(profitloss >= 0)
-      {
-        setLineColor(green[500])
-      }
-      else
-      {
-        setLineColor(red[500])
-      }
+    if (profitloss >= 0) {
+      setLineColor(green[500])
+    } else {
+      setLineColor(red[500])
+    }
   }, [data]);
 
   useEffect(() => {
-    if (chartData && profitloss) {
-      chartInstanceRef.current = createChart(chartRef.current, {
+    if (chartData && chartData.length > 0 && profitloss !== undefined) {
+      chartInstanceRef.current = createChart(chartRef.current!, {
         width: window.innerWidth * 0.7,
         height: 300,
         layout: {
@@ -44,7 +40,8 @@ export const Chart: React.FC = ({ data, profitloss }) => {
         lineWidth: 2,
       });
 
-      lineSeries.setData(chartData);
+      const filteredChartData = chartData.filter(point => point.value !== null && point.value !== undefined);
+      lineSeries.setData(filteredChartData);
 
       const handleResize = () => {
         chartInstanceRef.current.applyOptions({ width: window.innerWidth * 0.7 });
@@ -57,7 +54,7 @@ export const Chart: React.FC = ({ data, profitloss }) => {
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [chartData]);
+  }, [chartData, lineColor, profitloss]);
 
   return (
     <div className={styles.chartContainer}>
