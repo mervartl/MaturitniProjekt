@@ -40,15 +40,23 @@ export let auth: Auth;
 
 const UserContext = React.createContext<UserContextProps>(null);
 const login = async (username: string, password: string) => {
-    const cred = await signInWithEmailAndPassword(auth, username, password);
-    return cred?.user;
+    try {
+        const cred = await signInWithEmailAndPassword(auth, username, password);
+        return { user: cred?.user };
+    } catch (error) {
+        return { error: error.message };
+    }
 };
 const logout = async () => {
     return signOut(auth);
 };
 const createUser = async (username: string, password: string) => {
-    const cred = await createUserWithEmailAndPassword(auth, username, password);
-    return cred?.user;
+    try {
+        const cred = await createUserWithEmailAndPassword(auth, username, password);
+        return { user: cred?.user };
+    } catch (error) {
+        return { error: error.message };
+    }
 };
 const deleteUser = async (password: string) => {
     const email = auth?.currentUser?.email;

@@ -1,15 +1,15 @@
 import { Button, Typography } from "@mui/material";
 import { useUserContext } from "./userContext";
+import { useRouter } from "next/router";
 
 export const LogReg: React.FC = () => {
-
   const { user, logout } = useUserContext();
-
+  const router = useRouter();
 
   const back = () => {
 
     logout?.();
-    window.location.href = "/";
+    router.push("/singin");
   }
 
   if (user) {
@@ -22,16 +22,12 @@ export const LogReg: React.FC = () => {
           <Button variant="outlined" onClick={() => back()}>
             Odhlásit
           </Button>
-
         )}
-
       </div>
     </div>
     )
   }
   else return null;
-
-
 }
 
 

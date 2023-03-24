@@ -13,7 +13,7 @@ const darkTheme = createTheme({
 function MyApp({ Component, pageProps }: AppProps) {
 
   return <ThemeProvider theme={darkTheme}><CssBaseline/>
-    <UserContextProvider> 
+    <UserContextProvider>
       <Component {...pageProps}/>
     </UserContextProvider>
   </ThemeProvider>

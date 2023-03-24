@@ -11,6 +11,7 @@ const Table = dynamic(() => import("@mui/material/Table"), {
 import { DetailComponent } from "./DetailComponent";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
+import { where } from "firebase/firestore";
 
 
 export const InputCrypto: React.FC = () => {
@@ -93,14 +94,19 @@ export const InputCrypto: React.FC = () => {
         }
       }, [url, cachedData]);
 
-    useEffect(() => {
-        const collectionRef = collection(db, "cryptocurrencies")
-        const q = query(collectionRef); //, orderBy("value")
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            setCryptos(querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id })))
-        });
-        return unsubscribe;
-    }, [])
+      useEffect(() => {
+        if (user?.user.uid) {
+        console.log(user.user.uid);
+          const collectionRef = collection(db, "cryptocurrencies");
+          const q = query(collectionRef, where("userId", "==", user.user.uid));
+          const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            setCryptos(
+              querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+            );
+          });
+          return unsubscribe;
+        }
+      }, [user?.user.uid]);
 
 
 
@@ -123,20 +129,14 @@ export const InputCrypto: React.FC = () => {
                 if (histoDataCache[hisUrl]) {
                     const histoData = histoDataCache[hisUrl];
                     updateCryptoHistoricalPrice(crypto, histoData);
-                    console.log(crypto);
-                    console.log("prvni" , histoCryptoSum);
                     setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
-                    console.log("druhy", histoCryptoSum);
                 } else {
                     axios.get(hisUrl).then(response => {
                         const histoData = response.data;
                         if (histoData) {
                             histoDataCache[hisUrl] = histoData;
                             updateCryptoHistoricalPrice(crypto, histoData);
-                            console.log(crypto);
-                            console.log("prvni" , histoCryptoSum);
                             setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
-                            console.log("druhy", histoCryptoSum);
                         }
                     });
                 }

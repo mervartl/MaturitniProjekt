@@ -12,11 +12,12 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Avatar } from '@mui/material';
 import { useUserContext } from './userContext';
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import Alert from '@mui/material/Alert';
 
-function Copyright(props: any) {
+const Copyright = (props: any) => {
     return (
         <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            {'Copyright © '}
             <Link color="inherit" href="https://delta-skola.cz/">
                 Lukáš Mervart
             </Link>{' '}
@@ -34,95 +35,119 @@ const theme = createTheme({
 
 export default function SignUp() {
 
+    const router = useRouter();
+
     const { user, createUser } = useUserContext();
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
     };
 
+
+    const handleRegister = async () => {
+        const response = await createUser?.(email, password);
+        if (response?.error) {
+            setErrorMessage(response.error);
+        } else {
+            setErrorMessage(null);
+        }
+    };
+
     useEffect(() => {
         if (user) {
-            window.location.href = "/cryptolium";
+            router.push("/cryptolium");
         }
     }, []);
 
     useEffect(() => {
         if (user?.user.email) {
-            window.location.href = "/cryptolium";
+            router.push("/cryptolium");
         }
     }, [user]);
 
     return (
-        <ThemeProvider theme={theme}>
-            <Container component="main" maxWidth="xs">
-                <CssBaseline />
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                    }}
-                >
-                    <Typography component="h1" variant="h3" marginBottom="2vh">
-                        CRYPTOLIUM
-                    </Typography>
+      <ThemeProvider theme={theme}>
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Typography component="h1" variant="h3" marginBottom="2vh">
+              CRYPTOLIUM
+            </Typography>
 
-                    <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
-                        <LockOutlinedIcon />
-                    </Avatar>
+            <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+              <LockOutlinedIcon />
+            </Avatar>
 
-                    <Typography component="h1" variant="h5">
-                        Sign up
-                    </Typography>
-                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-                        <Grid container spacing={2}>
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email Address"
-                                    name="email"
-                                    autoComplete="email"
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    autoComplete="new-password"
-                                    onChange={(e) => setPassword(e.target.value)}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            sx={{ mt: 3, mb: 2 }}
-                            onClick={() => createUser?.(email, password)}
-                        >
-                            Sign Up
-                        </Button>
-                        <Grid container justifyContent="flex-end">
-                            <Grid item>
-                                <Link href="/singin" variant="body2">
-                                    Už máš účet? Přihlaš se
-                                </Link>
-                            </Grid>
-                        </Grid>
-                    </Box>
-                </Box>
-                <Copyright sx={{ mt: 5 }} />
-            </Container>
-        </ThemeProvider>
+            <Typography component="h1" variant="h5">
+              Sign up
+            </Typography>
+            <Box
+              component="form"
+              noValidate
+              onSubmit={handleSubmit}
+              sx={{ mt: 3 }}
+            >
+              {errorMessage && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {errorMessage}
+                </Alert>
+              )}
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="email"
+                    label="Email Address"
+                    name="email"
+                    autoComplete="email"
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="password"
+                    label="Password"
+                    type="password"
+                    id="password"
+                    autoComplete="new-password"
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                </Grid>
+              </Grid>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+                onClick={() => handleRegister()}
+              >
+                Sign Up
+              </Button>
+              <Grid container justifyContent="flex-end">
+                <Grid item>
+                  <Link href="/singin" variant="body2">
+                    Už máš účet? Přihlaš se
+                  </Link>
+                </Grid>
+              </Grid>
+            </Box>
+          </Box>
+          <Copyright sx={{ mt: 5 }} />
+        </Container>
+      </ThemeProvider>
     );
 }

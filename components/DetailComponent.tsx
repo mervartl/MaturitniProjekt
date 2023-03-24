@@ -1,6 +1,7 @@
 import { Button, Divider, Grid, Typography } from "@mui/material";
 import axios from "axios";
 import { collection, query, onSnapshot, where, doc, deleteDoc } from "firebase/firestore";
+import { useUserContext } from "./userContext";
 import moment from "moment";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "../firebase";
@@ -11,6 +12,8 @@ import { HistoricChart } from "./HistoricChart";
 import { Chart } from "./Chart";
 
 export const DetailComponent: React.FC = ({ setDtail, cName }) => {
+  const { user } = useUserContext()
+
   const [cryptos, setCryptos] = useState<DBCryptos>([]);
   const [histoData, setHistoData] = useState<Data[]>();
   const [curData, setCurData] = useState<any | null>();
@@ -53,17 +56,19 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     nameId: string;
   };
 
-
-  useEffect(() => {
+useEffect(() => {
+  if (user?.user.uid) {
+  console.log(user.user.uid);
     const collectionRef = collection(db, "cryptocurrencies");
-    const q = query(collectionRef, where("name", "==", cName));
+    const q = query(collectionRef, where("userId", "==", user.user.uid), where("name", "==", cName));
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setCryptos(
         querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
       );
     });
     return unsubscribe;
-  }, []);
+  }
+}, [user?.user.uid]);
 
   useEffect(() => {
     cryptos.forEach((crypto) => {
@@ -177,11 +182,8 @@ export const DetailComponent: React.FC = ({ setDtail, cName }) => {
     const docRef = doc(db, "cryptocurrencies", id);
     deleteDoc(docRef)
       .then(() => {
-        if (isEmpty(cryptos)) //pokud se smazou vsechny, musi to hodit zpatky na list, zatim to dela brikule
-        {
-          setDtail(false);
-        }
         console.log("Kryptoměny byla odstraněna");
+        setDtail(false);
       })
       .catch(error => {
         console.log(error);
