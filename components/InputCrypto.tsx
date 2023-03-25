@@ -5,13 +5,14 @@ import { useUserContext } from "./userContext";
 import axios from "axios";
 import { Button, Divider, Paper, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import dynamic from 'next/dynamic'
-const Table = dynamic(() => import("@mui/material/Table"), {
-    ssr: false,
-});
 import { DetailComponent } from "./DetailComponent";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
 import { where } from "firebase/firestore";
+const Table = dynamic(() => import("@mui/material/Table"), {
+    ssr: false,
+});
+
 
 
 export const InputCrypto: React.FC = () => {
@@ -63,6 +64,9 @@ export const InputCrypto: React.FC = () => {
     const [dtail, setDtail] = useState(false);
     const [profitloss, setProfitloss] = useState<number>(0);
 
+    const [loading, setLoading] = useState(true);
+
+
     const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
     const cachedData = useMemo(() => {
@@ -96,7 +100,6 @@ export const InputCrypto: React.FC = () => {
 
       useEffect(() => {
         if (user?.user.uid) {
-        console.log(user.user.uid);
           const collectionRef = collection(db, "cryptocurrencies");
           const q = query(collectionRef, where("userId", "==", user.user.uid));
           const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -105,6 +108,10 @@ export const InputCrypto: React.FC = () => {
             );
           });
           return unsubscribe;
+        }
+        else
+        {
+          setLoading(false);
         }
       }, [user?.user.uid]);
 
@@ -197,13 +204,12 @@ export const InputCrypto: React.FC = () => {
 
 
     useEffect(()=>{
-        console.log(histoCryptoSum);
         if(histoCryptoSum)
         {
             setProfitloss(cryptoSum - histoCryptoSum);
+            setLoading(false);
         }
     },[histoCryptoSum]);
-    
     
 
     const onButtonClick = (name: string) => {
@@ -213,7 +219,7 @@ export const InputCrypto: React.FC = () => {
 
 
     const div = <div>
-        {dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
+        {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
             (user ? (
             <div>
             <Typography display="inline" variant="h4">Celkový P/L: </Typography>
@@ -243,7 +249,7 @@ export const InputCrypto: React.FC = () => {
                             </TableRow>) : null)) : null}
                     </TableBody>
                 </Table>
-            </TableContainer></div>) : <Typography variant="h3">Nejsi přihlášen!</Typography>)}
+            </TableContainer></div>) : <Typography variant="h3">Nejsi přihlášen!</Typography>))}
     </div>
 
     return div;

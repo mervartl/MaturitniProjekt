@@ -4,11 +4,12 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import axios from "axios";
-import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
+import { addDoc, collection, onSnapshot, query, Timestamp } from "firebase/firestore";
 import moment from "moment";
 import React, { useState, useEffect, useMemo } from "react";
 import { db } from "../firebase";
 import { useUserContext } from "./userContext";
+import Alert from '@mui/material/Alert';
 
 type CryptoData = {
   id: string;
@@ -28,6 +29,10 @@ export const Sidebar: React.FC = () => {
   const [cryptoSymbol, setCryptoSymbol] = useState("");
   const [cryptoImg, setCryptoImg] = useState("");
   const [cryptoNameId, setCryptoNameId] = useState("");
+
+  const [minDate, setMinDate] = useState();
+  const [errorMessage, setErrorMessage] = useState<string>();
+  
 
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
@@ -95,8 +100,23 @@ export const Sidebar: React.FC = () => {
     if (dateValue) {
       const inputDate = new Date(dateValue);
       const now = new Date();
-      return inputDate <= now;
-    }
+
+      axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`).then((response) => {
+        const dat = response;
+        setMinDate(dat.data.prices[0][0]);
+      });
+
+      if(inputDate > now)
+      {
+        setErrorMessage("Datum je budoucnosti.");
+      }
+      if(inputDate < minDate)
+      {
+        setErrorMessage("Datum je v minulosti.");
+      }
+
+      return inputDate <= now && inputDate >= minDate;
+    }   
     return false;
   };
 
@@ -193,6 +213,11 @@ export const Sidebar: React.FC = () => {
         <Button id="btn" variant="contained" type="submit">
           Potvrdit
         </Button>
+        {errorMessage && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  {errorMessage}
+                </Alert>
+              )}
       </Stack>
     </div>
   ) : null;
