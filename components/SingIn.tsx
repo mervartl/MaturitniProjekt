@@ -15,18 +15,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Alert from '@mui/material/Alert';
 
-const Copyright = (props: any) => {
-    return (
-        <Typography variant="body2" color="text.secondary" align="center" {...props}>
-            <Link color="inherit" href="https://delta-skola.cz/">
-                Lukáš Mervart
-            </Link>{' '}
-            {new Date().getFullYear()}
-            {'.'}
-        </Typography>
-    );
-}
-
 const theme = createTheme({
     palette: {
         mode: 'dark',
@@ -134,11 +122,6 @@ export default function SignIn() {
                 Sign In
               </Button>
               <Grid container>
-                <Grid item xs>
-                  <Link href="#" variant="body2">
-                    Zapomněl si heslo?
-                  </Link>
-                </Grid>
                 <Grid item>
                   <Link href="/" variant="body2">
                     {"Ještě nemáš účet? Zaregistruj se."}
@@ -147,7 +130,6 @@ export default function SignIn() {
               </Grid>
             </Box>
           </Box>
-          <Copyright sx={{ mt: 8, mb: 4 }} />
         </Container>
       </ThemeProvider>
     );

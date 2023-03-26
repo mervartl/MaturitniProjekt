@@ -165,7 +165,7 @@ export const InputCrypto: React.FC = () => {
             }
         });
     }
-
+    const neco = 0;
     cryptos.forEach(crypto => {
         data.forEach(dat => {
             if (crypto.symbol == dat.symbol) {
@@ -215,6 +215,8 @@ export const InputCrypto: React.FC = () => {
     const onButtonClick = (name: string) => {
         setCName(name);
         setDtail(true);
+
+        
     }
 
 
@@ -222,9 +224,11 @@ export const InputCrypto: React.FC = () => {
         {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
             (user ? (
             <div>
-            <Typography display="inline" variant="h4">Celkový P/L: </Typography>
+            <Typography display="inline" variant="h4">Celkový P/L: </Typography> 
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{profitloss > 0 ? "+" : ""}{Math.round(profitloss * 100) / 100} Kč </Typography>
-            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss / histoCryptoSum * 100 * 100) / 100}%</Typography><Divider sx={{paddingBottom: "2%"}}/>
+            <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss / histoCryptoSum * 100 * 100) / 100}%</Typography><br/>
+            <Typography display="inline" variant="h4">Hodnota portfolia: <NumericFormat value={Math.round(cryptos.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0))} displayType="text" thousandSeparator=" " decimalSeparator=","/> Kč</Typography>
+            <Divider sx={{paddingBottom: "2%"}}/>
             <TableContainer component={Paper}>
                 <Table>
                     <TableHead>

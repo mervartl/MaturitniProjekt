@@ -128,7 +128,7 @@ useEffect(() => {
     getCurData();
   }, [url, cachedData]);
 
-  const getCurData = async () => {
+  /*const getCurData = async () => {
     if (url.match(regex)) {
       if (cachedData) {
         setCurData(cachedData);
@@ -145,9 +145,30 @@ useEffect(() => {
       {
       setCurPrice(curData.market_data.current_price["czk"]);
       setCurMCap(curData.market_data.market_cap["czk"]);
-      setCurTVolume(curData.market_data.total_volume["czk"]);  
+      setCurTVolume(curData.market_data.total_volume["czk"]);    `coins/${urlId}`
       }
                  
+    }
+  };*/
+
+  const getCurData = async () => {
+    if (url.match(regex)) {
+      if (cachedData) {
+        setCurData(cachedData);
+      } else {
+        await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`).then((response) => {
+          setCurData(response.data);
+          localStorage.setItem(
+            url,
+            JSON.stringify({ data: response.data, timestamp: Date.now() })
+          );
+        });
+      }
+      if(curData) {
+        setCurPrice(curData.market_data.current_price["czk"]);
+        setCurMCap(curData.market_data.market_cap["czk"]);
+        setCurTVolume(curData.market_data.total_volume["czk"]);
+      }
     }
   };
 
@@ -161,12 +182,12 @@ useEffect(() => {
   }, [curData]);
 
 
-  useEffect(() => {
+  /*const getHistoData = async () => {
     if (hisUrl.match(regex)) {
       if (cachedHistoData) {
         setHistoData(cachedHistoData);
       } else {
-        axios.get(hisUrl).then((response) => {
+        await axios.get(hisUrl).then((response) => {
           setHistoData(response.data);
           localStorage.setItem(
             hisUrl,
@@ -175,6 +196,27 @@ useEffect(() => {
         });
       }
     }
+  };*/
+
+  const getHistoData = async () => {
+    if (hisUrl.match(regex)) {
+      if (cachedHistoData) {
+        setHistoData(cachedHistoData);
+      } else {
+        await axios.get(`/api/proxy?url=${encodeURIComponent(hisUrl)}`).then((response) => {
+          setHistoData(response.data);
+          localStorage.setItem(
+            hisUrl,
+            JSON.stringify({ data: response.data, timestamp: Date.now() })
+          );
+        });
+      }
+    }
+  };
+
+  
+  useEffect(() => {
+    getHistoData();
   }, [hisUrl, cachedHistoData]);
 
 
