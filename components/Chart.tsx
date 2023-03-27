@@ -3,7 +3,12 @@ import { createChart } from 'lightweight-charts';
 import styles from '../styles/Home.module.css';
 import { green, red} from "@mui/material/colors";
 
-export const Chart: React.FC = ({ data, profitloss }) => {
+interface ChartProps {
+  data: any;
+  profitloss: number;
+}
+
+export const Chart: React.FC<ChartProps> = ({ data, profitloss }) => {
   const [chartData, setChartData] = useState<{ time: number; value: number }[]>();
   const [lineColor, setLineColor] = useState<string>();
 
