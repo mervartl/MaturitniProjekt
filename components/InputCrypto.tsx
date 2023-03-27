@@ -215,10 +215,8 @@ export const InputCrypto: React.FC = () => {
     const onButtonClick = (name: string) => {
         setCName(name);
         setDtail(true);
-
-        
-    }
-
+    };
+    
 
     const div = <div>
         {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :

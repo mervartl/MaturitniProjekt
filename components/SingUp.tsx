@@ -50,7 +50,7 @@ export default function SignUp() {
         if (user) {
             router.push("/cryptolium");
         }
-    }, []);
+    });
 
     useEffect(() => {
         if (user?.user.email) {

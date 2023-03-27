@@ -128,29 +128,6 @@ useEffect(() => {
     getCurData();
   }, [url, cachedData]);
 
-  /*const getCurData = async () => {
-    if (url.match(regex)) {
-      if (cachedData) {
-        setCurData(cachedData);
-      } else {
-        await axios.get(url).then((response) => {
-          setCurData(response.data);
-          localStorage.setItem(
-            url,
-            JSON.stringify({ data: response.data, timestamp: Date.now() })
-          );
-        });
-      }
-      if(curData)
-      {
-      setCurPrice(curData.market_data.current_price["czk"]);
-      setCurMCap(curData.market_data.market_cap["czk"]);
-      setCurTVolume(curData.market_data.total_volume["czk"]);    `coins/${urlId}`
-      }
-                 
-    }
-  };*/
-
   const getCurData = async () => {
     if (url.match(regex)) {
       if (cachedData) {
@@ -180,23 +157,6 @@ useEffect(() => {
       setCurTVolume(curData.market_data.total_volume["czk"]);  
     }
   }, [curData]);
-
-
-  /*const getHistoData = async () => {
-    if (hisUrl.match(regex)) {
-      if (cachedHistoData) {
-        setHistoData(cachedHistoData);
-      } else {
-        await axios.get(hisUrl).then((response) => {
-          setHistoData(response.data);
-          localStorage.setItem(
-            hisUrl,
-            JSON.stringify({ data: response.data, timestamp: Date.now() })
-          );
-        });
-      }
-    }
-  };*/
 
   const getHistoData = async () => {
     if (hisUrl.match(regex)) {
@@ -329,7 +289,7 @@ useEffect(() => {
           </Grid>
         </Grid>   
         {cryptos.map(crypto =>
-        (<Grid container columns={1} spacing={1}>
+        (<Grid container columns={1} spacing={1} key={crypto.id}>
           <Grid item xs={1} textAlign="center">
             <Typography variant="h5" paddingTop="2%" >{crypto.value} {cName} <img src={img} height="20px"></img> koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
