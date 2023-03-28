@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { createChart } from 'lightweight-charts';
+import { createChart, IChartApi } from 'lightweight-charts';
 import styles from '../styles/Home.module.css';
-import { green, red} from "@mui/material/colors";
+import { green, red } from '@mui/material/colors';
 
 interface ChartProps {
   data: any;
@@ -9,40 +9,33 @@ interface ChartProps {
   profitloss: number;
 }
 
-
 export const HistoricChart: React.FC<ChartProps> = ({ data, timestamp, profitloss }) => {
   const [chartData, setChartData] = useState();
   const [lineColor, setLineColor] = useState<string>();
 
-  const chartRef = useRef();
-  const chartInstanceRef = useRef();
-
+  const chartRef = useRef<HTMLDivElement>(null);
+  const chartInstanceRef = useRef<IChartApi | undefined>(undefined);
 
   useEffect(() => {
-    if(data)
-    {
+    if (data) {
       const date = new Date(timestamp);
 
       setChartData(
         data
-          .filter(([time, value]) => time >= date)
-          .map(([time, value]) => ({ time: time / 1000, value }))
+          .filter(([time, value]: [Date, number]) => time >= date)
+          .map(([time, value]: [number, number]) => ({ time: time / 1000, value }))
       );
     }
 
-    if(profitloss >= 0)
-      {
-        setLineColor(green[500])
-      }
-      else
-      {
-        setLineColor(red[500])
-      }
-    
+    if (profitloss >= 0) {
+      setLineColor(green[500]);
+    } else {
+      setLineColor(red[500]);
+    }
   }, [data]);
 
   useEffect(() => {
-    if (chartData && profitloss) {
+    if (chartData && profitloss && chartRef.current) {
       chartInstanceRef.current = createChart(chartRef.current, {
         width: window.innerWidth * 0.7,
         height: 300,
@@ -62,13 +55,13 @@ export const HistoricChart: React.FC<ChartProps> = ({ data, timestamp, profitlos
       lineSeries.setData(chartData);
 
       const handleResize = () => {
-        chartInstanceRef.current.applyOptions({ width: window.innerWidth * 0.7 });
+        chartInstanceRef.current?.applyOptions({ width: window.innerWidth * 0.7 });
       };
 
       window.addEventListener('resize', handleResize);
 
       return () => {
-        chartInstanceRef.current.remove();
+        chartInstanceRef.current?.remove();
         window.removeEventListener('resize', handleResize);
       };
     }

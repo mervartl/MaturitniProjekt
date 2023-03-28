@@ -38,12 +38,12 @@ export default function SignUp() {
 
 
     const handleRegister = async () => {
-        const response = await createUser?.(email, password);
-        if (response?.error) {
-            setErrorMessage(response.error);
-        } else {
-            setErrorMessage(null);
-        }
+      const response = await createUser?.(email, password);
+      if (typeof response === 'string') {
+        setErrorMessage(response);
+      } else {
+        setErrorMessage(null);
+      }
     };
 
     useEffect(() => {

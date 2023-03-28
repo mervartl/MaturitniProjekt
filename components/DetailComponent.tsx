@@ -7,11 +7,15 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { db } from "../firebase";
 import { NumericFormat } from 'react-number-format';
 import { green, red } from "@mui/material/colors";
-import { isEmpty } from "@firebase/util";
 import { HistoricChart } from "./HistoricChart";
 import { Chart } from "./Chart";
 
-export const DetailComponent: React.FC = ({ setDtail, cName }) => {
+interface DetailComponentProps {
+  setDtail: (value: boolean) => void;
+  cName: string;
+}
+
+export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cName }) => {
   const { user } = useUserContext()
 
   const [cryptos, setCryptos] = useState<DBCryptos>([]);

@@ -17,7 +17,7 @@ export const Chart: React.FC<ChartProps> = ({ data, profitloss }) => {
 
   useEffect(() => {
     if (data) {
-      setChartData(data.map(([time, value]) => ({ time: time / 1000, value })));
+      setChartData(data.map(([time, value]: [number, number]) => ({ time: time / 1000, value })));
     }
 
     if (profitloss >= 0) {
