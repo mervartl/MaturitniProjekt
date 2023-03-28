@@ -28,6 +28,7 @@ export default function SignUp() {
     const { user, createUser } = useUserContext();
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [passwordVer, setPasswordVer] = useState<string>("");
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -38,11 +39,18 @@ export default function SignUp() {
 
 
     const handleRegister = async () => {
-      const response = await createUser?.(email, password);
-      if (response?.error) {
-        setErrorMessage(response.error);
-      } else {
-        setErrorMessage(null);
+      if(password === passwordVer)
+      {
+        const response = await createUser?.(email, password);
+        if (response?.error) {
+          setErrorMessage(response.error);
+        } else {
+          setErrorMessage(null);
+        }
+      }
+      else
+      {
+        setErrorMessage("Hesla se neschodují.");
       }
     };
 
@@ -97,7 +105,7 @@ export default function SignUp() {
                     required
                     fullWidth
                     id="email"
-                    label="Email Address"
+                    label="E-mail"
                     name="email"
                     autoComplete="email"
                     onChange={(e) => setEmail(e.target.value)}
@@ -108,11 +116,23 @@ export default function SignUp() {
                     required
                     fullWidth
                     name="password"
-                    label="Password"
+                    label="Heslo"
                     type="password"
                     id="password"
                     autoComplete="new-password"
                     onChange={(e) => setPassword(e.target.value)}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    required
+                    fullWidth
+                    name="passwordVer"
+                    label="Zadej heslo znovu"
+                    type="password"
+                    id="passwordVer"
+                    autoComplete="new-password"
+                    onChange={(e) => setPasswordVer(e.target.value)}
                   />
                 </Grid>
               </Grid>
