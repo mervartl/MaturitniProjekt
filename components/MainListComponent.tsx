@@ -26,7 +26,7 @@ type HistoDataCache = {
   [key: string]: any;
 }
 
-export const InputCrypto: React.FC = () => {
+export const MainListComponent: React.FC = () => {
 
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<Crypto[] | undefined>(undefined);

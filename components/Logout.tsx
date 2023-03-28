@@ -2,7 +2,7 @@ import { Button, Typography } from "@mui/material";
 import { useUserContext } from "./userContext";
 import { useRouter } from "next/router";
 
-export const LogReg: React.FC = () => {
+export const Logout: React.FC = () => {
   const { user, logout } = useUserContext();
   const router = useRouter();
 

@@ -3,8 +3,8 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Sidebar } from '../components/Sidebar'
 import styles from '../styles/Home.module.css'
-import { InputCrypto } from '../components/InputCrypto';
-import { LogReg } from '../components/LogReg';
+import { MainListComponent } from '../components/MainListComponent';
+import { Logout } from '../components/Logout';
 
 const Home: NextPage = () => {
   return (
@@ -16,7 +16,7 @@ const Home: NextPage = () => {
       </Head>
       <div>
         <Grid container columns={12} spacing={2} >
-          <Grid item md={3} lg={2.5} xs={12} textAlign="center" marginTop="1.5%" paddingRight="3%"><LogReg /></Grid>
+          <Grid item md={3} lg={2.5} xs={12} textAlign="center" marginTop="1.5%" paddingRight="3%"><Logout /></Grid>
           <Grid item md={9} lg={9.5} xs={12} textAlign="center" marginTop="1%">
             <Typography variant="h3" textAlign="center" paddingBottom="2.5%">
               CRYPTOLIUM
@@ -25,7 +25,7 @@ const Home: NextPage = () => {
           <Grid container columns={12} spacing={2} minHeight="90.7vh">
             <Grid container columns={12} spacing={2}>
               <Grid item md={3} lg={2.5} xs={12} textAlign="center" marginTop="2vh" ><Sidebar /></Grid>
-              <Grid item md={9} lg={9.5} xs={12} textAlign="center" padding="0%" marginTop="2vh" className={styles.bod}><InputCrypto /></Grid>
+              <Grid item md={9} lg={9.5} xs={12} textAlign="center" padding="0%" marginTop="2vh" className={styles.bod}><MainListComponent /></Grid>
             </Grid>
           </Grid>
           <Grid container columns={12} spacing={2}>

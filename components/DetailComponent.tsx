@@ -76,7 +76,6 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   useEffect(() => {
     cryptos.forEach((crypto) => {
-      //data z db
       if (crypto.name == cName) {
         setUrlId(crypto.nameId);
         setImg(crypto.img);

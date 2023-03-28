@@ -33,14 +33,15 @@ export default function SignIn() {
 
 
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        await handleLogin();
     };
 
     const handleLogin = async () => {
         const response = await login?.(email, password);
-        if (typeof response === 'string') {
-          setErrorMessage(response);
+        if (response?.error) {
+          setErrorMessage(response.error);
         } else {
           setErrorMessage(null);
         }
@@ -48,13 +49,13 @@ export default function SignIn() {
 
 
     useEffect(() => {
-        if (user) {
+        if (user?.user.uid) {
             router.push("/cryptolium");
         }
-    }, []);
+    },[]);
 
     useEffect(() => {
-        if (user) {
+        if (user?.user.uid) {
             router.push("/cryptolium");
         }
     }, [user]);
@@ -116,7 +117,6 @@ export default function SignIn() {
                 type="submit"
                 fullWidth
                 variant="contained"
-                onClick={() => handleLogin()}
                 sx={{ mt: 3, mb: 2 }}
               >
                 Sign In

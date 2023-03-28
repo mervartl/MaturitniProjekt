@@ -48,26 +48,61 @@ const UserContext = React.createContext<UserContextProps>({
 
 
 const login = async (username: string, password: string): Promise<UserResult> => {
-    try {
-      const cred = await signInWithEmailAndPassword(auth, username, password);
-      return { user: createFullUser(cred.user) };
-    } catch (error) {
-      return { error: (error as Error).message };
+  try {
+    const cred = await signInWithEmailAndPassword(auth, username, password);
+    return { user: createFullUser(cred.user) };
+  } catch (error) {
+    const errorCode = (error as Error).message;
+    let errorMessage;
+    console.log(errorCode);
+
+    switch (errorCode) {
+      case 'Firebase: Error (auth/invalid-email).':
+        errorMessage = 'Neplatná e-mailová adresa';
+        break;
+      case 'Firebase: Error (auth/user-not-found).':
+        errorMessage = 'Neexistuje žádný uživatel s tímto e-mailem.';
+        break;
+      case 'Firebase: Error (auth/wrong-password).':
+        errorMessage = 'Špatné heslo.';
+        break;
+      default:
+        errorMessage = 'Při přihlašování se něco pokazilo. Zkuste znovu.';
     }
-  };
+
+    return { error: errorMessage };
+  }
+};
 
 const logout = async () => {
   return signOut(auth);
 };
 
 const createUser = async (username: string, password: string): Promise<UserResult> => {
-    try {
+  try {
       const cred = await createUserWithEmailAndPassword(auth, username, password);
       return { user: createFullUser(cred.user) };
-    } catch (error) {
-      return { error: (error as Error).message };
-    }
-  };
+  } catch (error) {
+      const errorCode = (error as Error).message;
+      let errorMessage;
+
+      switch (errorCode) {
+          case 'Firebase: Error (auth/email-already-in-use).':
+              errorMessage = 'Tento e-mail už je používán.';
+              break;
+          case 'Firebase: Error (auth/invalid-email).':
+              errorMessage = 'Neplatná e-mailová adresa.';
+              break;
+          case 'Firebase: Password should be at least 6 characters (auth/weak-password).':
+              errorMessage = 'Heslo je příliš slabé. Minimální počet znaků je 6.';
+              break;
+          default:
+              errorMessage = 'Došlo k chybě při vytváření účtu. Zkuste to prosím znovu.';
+      }
+
+      return { error: errorMessage };
+  }
+};
 
 const deleteUser = async (password: string) => {
   const email = auth?.currentUser?.email;
