@@ -13,52 +13,28 @@ const Table = dynamic(() => import("@mui/material/Table"), {
     ssr: false,
 });
 
+type Crypto = {
+  id: string;
+  symbol: any;
+  current_price: any;
+  nameId: any;
+  value: any;
+  historical_price: any;
+};
+
+type HistoDataCache = {
+  [key: string]: any;
+}
+
 export const InputCrypto: React.FC = () => {
 
-    type DataCryptos = {
-        forEach(arg0: (dat: any) => void): unknown; //data z api
-        id: string;
-        symbol: string;
-        name: string;
-        image: string;
-        current_price: number;
-    };
-
-    type MergedCryptos = {
-        push(obj: any): unknown;
-        find(arg0: (o: any) => boolean): unknown;
-        current_price: number
-        id: string
-        img: string
-        name: string
-        nameId: string
-        symbol: string
-        timestamp: string
-        userId: string
-        value: number
-    };
-
-
-    type DBCryptos = { //data z databaze
-        map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
-        forEach(arg0: (crypto: any) => void): unknown;
-        id: string;
-        symbol: string;
-        name: string;
-        img: string;
-        value: number;
-        userId: string;
-        timestamp: string;
-    };
-
-
     const { user } = useUserContext();
-    const [cryptos, setCryptos] = useState<DBCryptos>([]);
-    const [data, setData] = useState<DataCryptos>([]);
+    const [cryptos, setCryptos] = useState<Crypto[] | undefined>(undefined);
+    const [data, setData] = useState<any>();
     const [cryptoSum, setCryptoSum] = useState<number>(0);
     const [cryptoObj, setCryptoObj] = useState<any>();
     const [histoCryptoSum, setHistoCryptoSum] = useState<number>(0);
-    const [cName, setCName] = useState<string>();
+    const [cName, setCName] = useState<string>("");
     const [dtail, setDtail] = useState(false);
     const [profitloss, setProfitloss] = useState<number>(0);
 
@@ -102,13 +78,11 @@ export const InputCrypto: React.FC = () => {
           const q = query(collectionRef, where("userId", "==", user.user.uid));
           const unsubscribe = onSnapshot(q, (querySnapshot) => {
             setCryptos(
-              querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+              querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
             );
           });
           return unsubscribe;
-        }
-        else
-        {
+        } else {
           setLoading(false);
         }
       }, [user?.user.uid]);
@@ -116,7 +90,7 @@ export const InputCrypto: React.FC = () => {
 
 
 
-    const histoDataCache = useMemo(() => ({}), []);
+    const histoDataCache: HistoDataCache = useMemo(() => ({}), []);
 
     useEffect(() => {
         if(cryptos)
@@ -134,14 +108,14 @@ export const InputCrypto: React.FC = () => {
                 if (histoDataCache[hisUrl]) {
                     const histoData = histoDataCache[hisUrl];
                     updateCryptoHistoricalPrice(crypto, histoData);
-                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0));
                 } else {
                     axios.get(hisUrl).then(response => {
                         const histoData = response.data;
                         if (histoData) {
                             histoDataCache[hisUrl] = histoData;
                             updateCryptoHistoricalPrice(crypto, histoData);
-                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0));
                         }
                     });
                 }
@@ -153,7 +127,7 @@ export const InputCrypto: React.FC = () => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
 
-        Object.entries(histoData).forEach(([key, value]) => {
+        Object.entries(histoData).forEach(([key, value] : [any, any]) => {
             if (key === "prices") {
                 value.forEach((val: any[]) => {
                     if (val[1] !== null && val[0] === tstamp) {
@@ -162,25 +136,39 @@ export const InputCrypto: React.FC = () => {
                 });
             }
         });
-    }
-    const neco = 0;
-    cryptos.forEach(crypto => {
-        data.forEach(dat => {
-            if (crypto.symbol == dat.symbol) {
+    };
+
+    
+
+    useEffect(()=>{
+      const getCurPrice = () => {
+        if (cryptos && data) {
+          cryptos.forEach((crypto) => {
+            data.forEach((dat: any) => {
+              if (crypto.symbol == dat.symbol) {
                 crypto.current_price = dat.current_price;
-            }
-        });
-    });
+              }
+            });
+          });
+        }
+      };
+      if(cryptos){
+        getCurPrice();
+      }
+    },[data]);    
 
 
     useEffect(() => {
+      if(cryptos)
+      {
         setCryptoObj(mergeOb(cryptos));
+      }       
     }, [cryptos]);
 
-    const mergeOb = (objects: DBCryptos) => {
-        const mergedObjects: MergedCryptos = [];
+    const mergeOb = (objects: any) => {
+        const mergedObjects: any[] = [];
       
-        objects.forEach(obj => {
+        objects.forEach((obj: { name: any; value: any; }) => {
           const existingObject = mergedObjects.find(o => o.name === obj.name);
           if (existingObject) {
             existingObject.value = Number(existingObject.value) + Number(obj.value);
@@ -223,7 +211,7 @@ export const InputCrypto: React.FC = () => {
             <Typography display="inline" variant="h4">Celkový P/L: </Typography> 
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{profitloss > 0 ? "+" : ""}{Math.round(profitloss * 100) / 100} Kč </Typography>
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{Math.round(profitloss / histoCryptoSum * 100 * 100) / 100}%</Typography><br/>
-            <Typography display="inline" variant="h4">Hodnota portfolia: <NumericFormat value={Math.round(cryptos.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0))} displayType="text" thousandSeparator=" " decimalSeparator=","/> Kč</Typography>
+            <Typography display="inline" variant="h4">Hodnota portfolia: <NumericFormat value={cryptos ? (Math.round(cryptos.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0))) : null} displayType="text" thousandSeparator=" " decimalSeparator=","/> Kč</Typography>
             <Divider sx={{paddingBottom: "2%"}}/>
             <TableContainer component={Paper}>
                 <Table>
@@ -238,7 +226,7 @@ export const InputCrypto: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {user && cryptoObj ? (cryptoObj.map(crypto => user.user.uid === crypto.userId ? (
+                        {user && cryptoObj ? (cryptoObj.map((crypto:any) => user.user.uid === crypto.userId ? (
                             <TableRow key={crypto.name}>
                                 <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
                                 <TableCell>{crypto.name}</TableCell>

@@ -16,12 +16,28 @@ type CryptoData = {
   name: string;
   symbol: string;
   image: string;
+  img: string;
+};
+
+type ListItem = {
+  name: string;
+  img: string;
+};
+
+
+type Crypto = {
+  id: string;
+  symbol: any;
+  current_price: any;
+  nameId: any;
+  value: any;
+  historical_price: any;
 };
 
 export const Sidebar: React.FC = () => {
-  const [listItems, setListItems] = useState<CryptoData[]>([]);
+  const [listItems, setListItems] = useState<ListItem[]>([]);
   const [data, setData] = useState<CryptoData[]>([]);
-  const [cryptos, setCryptos] = useState<CryptoData[]>([]);
+  const [cryptos, setCryptos] = useState<Crypto[]>([]);
   const { user } = useUserContext();
   const [numberOfCrypto, setNumberOfCrypto] = useState<number>();
   const [cryptoName, setCryptoName] = useState<string>();
@@ -71,7 +87,7 @@ export const Sidebar: React.FC = () => {
     const q = query(collectionRef);
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setCryptos(
-        querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
+        querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
       );
     });
     return unsubscribe;
@@ -105,17 +121,19 @@ export const Sidebar: React.FC = () => {
         const dat = response;
         setMinDate(dat.data.prices[0][0]);
       });
-
-      if(inputDate > now)
+      if(minDate)
       {
-        setErrorMessage("Datum je budoucnosti.");
-      }
-      if(inputDate < minDate)
-      {
-        setErrorMessage("Datum je v minulosti.");
-      }
+        if(inputDate > now)
+        {
+          setErrorMessage("Datum je budoucnosti.");
+        }
+        if(inputDate < minDate)
+        {
+          setErrorMessage("Datum je v minulosti.");
+        }
 
-      return inputDate <= now && inputDate >= minDate;
+        return inputDate <= now && inputDate >= minDate;
+      }     
     }   
     return false;
   };
@@ -162,13 +180,18 @@ export const Sidebar: React.FC = () => {
                 ...params.InputProps,
                 startAdornment: (
                   <>
-                    {cryptoName && (
-                      <img
-                        src={listItems.find((item) => item.name === cryptoName).img}
-                        alt={cryptoName}
-                        style={{ width: "25px", marginRight: "8px" }}
-                      />
-                    )}
+                    {cryptoName &&
+                      listItems.find((item) => item.name === cryptoName)
+                        ?.img && (
+                        <img
+                          src={
+                            listItems.find((item) => item.name === cryptoName)
+                              ?.img
+                          }
+                          alt={cryptoName}
+                          style={{ width: "25px", marginRight: "8px" }}
+                        />
+                      )}
                     {params.InputProps.startAdornment}
                   </>
                 ),
@@ -214,10 +237,10 @@ export const Sidebar: React.FC = () => {
           Potvrdit
         </Button>
         {errorMessage && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {errorMessage}
-                </Alert>
-              )}
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorMessage}
+          </Alert>
+        )}
       </Stack>
     </div>
   ) : null;
