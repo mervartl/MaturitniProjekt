@@ -154,7 +154,7 @@ export const Sidebar: React.FC = () => {
         nameId: cryptoNameId,
       });
     } else {
-      console.log("Value is not a positive number or date is in the future.");
+      console.log("Číslo nebo datum není validní.");
     }
   };
 

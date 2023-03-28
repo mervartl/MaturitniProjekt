@@ -62,7 +62,6 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   useEffect(() => {
     if (user?.user.uid) {
-      console.log(user.user.uid);
       const collectionRef = collection(db, "cryptocurrencies");
       const q = query(collectionRef, where("userId", "==", user.user.uid), where("name", "==", cName));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
@@ -199,10 +198,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
 
   useEffect(() => {
-    if (!histoData) {
-      console.log("nejsou histoData");
-    }
-    else {
+    if(histoData) {
       cryptos.forEach(crypto => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
