@@ -39,10 +39,10 @@ export default function SignIn() {
 
     const handleLogin = async () => {
         const response = await login?.(email, password);
-        if (response?.error) {
-            setErrorMessage(response.error);
+        if (typeof response === 'string') {
+          setErrorMessage(response);
         } else {
-            setErrorMessage(null);
+          setErrorMessage(null);
         }
     };
 
