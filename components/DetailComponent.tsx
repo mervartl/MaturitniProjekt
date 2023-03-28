@@ -18,8 +18,8 @@ interface DetailComponentProps {
 export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cName }) => {
   const { user } = useUserContext()
 
-  const [cryptos, setCryptos] = useState<DBCryptos>([]);
-  const [histoData, setHistoData] = useState<Data[]>();
+  const [cryptos, setCryptos] = useState<Crypto[]>([]);
+  const [histoData, setHistoData] = useState<HistoData>();
   const [curData, setCurData] = useState<any | null>();
   const [sum, setSum] = useState<number>();
 
@@ -40,39 +40,39 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   const [profitloss, setProfitloss] = useState<number>();
 
-  interface Data {
-    forEach(arg0: (val: any) => void): unknown;
-    prices: [number, number][],
-    market_caps: [number, number][],
-  }
+  type HistoData = {
+    prices: [number, number | null][];
+    market_caps: [number, number | null][];
+    total_volumes: [number, number | null][];
+  };
+  
 
-
-  type DBCryptos = {
-    reduce(arg0: (acc: any, { value }: { value: any; }) => any, arg1: number): import("react").SetStateAction<number | undefined>;
-    //data z databaze
-    map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
-    forEach(arg0: (crypto: any) => void): unknown;
+  type Crypto = {
     id: string;
-    name: string;
-    img: string;
-    value: number;
-    timestamp: string;
-    nameId: string;
+    name?: string;
+    userId?: string;
+    nameId: any;
+    img: any;
+    value: any;
+    timestamp: any;
+    historical_price?: any;
+    historical_tvolume?: any;
+    historical_mcap?: any;
   };
 
-useEffect(() => {
-  if (user?.user.uid) {
-  console.log(user.user.uid);
-    const collectionRef = collection(db, "cryptocurrencies");
-    const q = query(collectionRef, where("userId", "==", user.user.uid), where("name", "==", cName));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      setCryptos(
-        querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
-      );
-    });
-    return unsubscribe;
-  }
-}, [user?.user.uid]);
+  useEffect(() => {
+    if (user?.user.uid) {
+      console.log(user.user.uid);
+      const collectionRef = collection(db, "cryptocurrencies");
+      const q = query(collectionRef, where("userId", "==", user.user.uid), where("name", "==", cName));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setCryptos(
+          querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
+        );
+      });
+      return unsubscribe;
+    }
+  }, [user?.user.uid]);
 
   useEffect(() => {
     cryptos.forEach((crypto) => {
@@ -288,7 +288,7 @@ useEffect(() => {
               <Typography>Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1} paddingBottom="2%">
-              <Chart data={histoData.prices} profitloss={profitloss}/><Divider />
+              <Chart data={histoData?.prices} profitloss={profitloss}/><Divider />
             </Grid>
           </Grid>
         </Grid>   
@@ -312,7 +312,7 @@ useEffect(() => {
                 <Typography>Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
               <Grid item xs={1} paddingBottom="4%">
-                <HistoricChart data={histoData.prices} timestamp={crypto.timestamp} profitloss={(curPrice * crypto.value - crypto.historical_price * crypto.value)}/><Divider />
+                <HistoricChart data={histoData?.prices} timestamp={crypto.timestamp} profitloss={(curPrice * crypto.value - crypto.historical_price * crypto.value)}/><Divider />
               </Grid>
             </Grid>
           </Grid>

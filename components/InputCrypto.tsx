@@ -13,8 +13,6 @@ const Table = dynamic(() => import("@mui/material/Table"), {
     ssr: false,
 });
 
-
-
 export const InputCrypto: React.FC = () => {
 
     type DataCryptos = {
@@ -41,8 +39,7 @@ export const InputCrypto: React.FC = () => {
     };
 
 
-    type DBCryptos = {
-        reduce(arg0: (acc: number, crypto: { value: number; historical_price: number; }) => number, arg1: number): import("react").SetStateAction<number>; //data z databaze
+    type DBCryptos = { //data z databaze
         map(arg0: (crypto: any) => JSX.Element): import("react").ReactNode;
         forEach(arg0: (crypto: any) => void): unknown;
         id: string;
@@ -166,7 +163,7 @@ export const InputCrypto: React.FC = () => {
             }
         });
     }
-
+    const neco = 0;
     cryptos.forEach(crypto => {
         data.forEach(dat => {
             if (crypto.symbol == dat.symbol) {
