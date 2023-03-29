@@ -48,7 +48,7 @@ export const MainListComponent: React.FC = () => {
           const cachedItem = localStorage.getItem(url);
           if (cachedItem) {
             const { data, timestamp } = JSON.parse(cachedItem);
-            if (Date.now() - timestamp < 15000) {
+            if (Date.now() - timestamp < 150000) {
               return data;
             }
           }
