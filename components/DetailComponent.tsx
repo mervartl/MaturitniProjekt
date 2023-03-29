@@ -139,7 +139,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
       if (cachedData) {
         setCurData(cachedData);
       } else {
-        await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`).then((response) => {
+        await axios.get(url).then((response) => { //`/api/proxy?url=${encodeURIComponent(url)}`
           setCurData(response.data);
           localStorage.setItem(
             url,
@@ -177,7 +177,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
       if (cachedHistoData) {
         setHistoData(cachedHistoData);
       } else {
-        await axios.get(`/api/proxy?url=${encodeURIComponent(hisUrl)}`).then((response) => {
+        await axios.get(hisUrl).then((response) => { //`/api/proxy?url=${encodeURIComponent(hisUrl)}`
           setHistoData(response.data);
           localStorage.setItem(
             hisUrl,
