@@ -272,7 +272,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   const back = <><Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
     <br /></>;
-  if (hPriceAssigned && sum && curPrice && profitloss && curPriceChange24h && curPriceChange30d && curPriceChange1y) {
+  if (hPriceAssigned && hMCapAssigned && hTVolAssigned && sum && curPrice && profitloss && curPriceChange24h && curPriceChange30d && curPriceChange1y) {
     return (
       <div>
         {back}
