@@ -50,6 +50,10 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
   const [curPrice, setCurPrice] = useState(null);
   const [curMCap, setCurMCap] = useState(null);
   const [curTVolume, setCurTVolume] = useState(null);
+  const [curPriceChange24h, setCurPriceChange24h] = useState<number>();
+  const [curPriceChange30d, setCurPriceChange30d] = useState<number>();
+  const [curPriceChange1y, setCurPriceChange1y] = useState<number>();
+  const [rank, setRank] = useState(null);
 
   const [img, setImg] = useState("");
   const [urlId, setUrlId] = useState();
@@ -142,8 +146,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     if (url.match(regex)) { //Zkontroluje jestli má URL správný formát
       if (cachedData) { //Pokud jsou v cache data, tak je nastavíme
         setCurData(cachedData);
-      } else { //Pokud ne, získáme je z API a nastavíme
-        await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`).then((response) => {
+      } else {
+        await axios.get(url).then((response) => { //`/api/proxy?url=${encodeURIComponent(url)}`
           setCurData(response.data);
           localStorage.setItem(
             url,
@@ -155,6 +159,10 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
         setCurPrice(curData.market_data.current_price["czk"]);
         setCurMCap(curData.market_data.market_cap["czk"]);
         setCurTVolume(curData.market_data.total_volume["czk"]);
+        setCurPriceChange24h(curData.market_data.price_change_percentage_24h);
+        setCurPriceChange30d(curData.market_data.price_change_percentage_30d);
+        setCurPriceChange1y(curData.market_data.price_change_percentage_1y);
+        setRank(curData.market_cap_rank);
       }
     }
   };
@@ -165,7 +173,11 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     if (curData) {
       setCurPrice(curData.market_data.current_price["czk"]);
       setCurMCap(curData.market_data.market_cap["czk"]);
-      setCurTVolume(curData.market_data.total_volume["czk"]);  
+      setCurTVolume(curData.market_data.total_volume["czk"]);
+      setCurPriceChange24h(curData.market_data.price_change_percentage_24h);
+      setCurPriceChange30d(curData.market_data.price_change_percentage_30d);
+      setCurPriceChange1y(curData.market_data.price_change_percentage_1y);
+      setRank(curData.market_cap_rank);  
     }
   }, [curData]);
 
@@ -175,8 +187,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     if (hisUrl.match(regex)) { //Zkontroluje jestli má URL správný formát
       if (cachedHistoData) { //Pokud jsou v cache data, tak je nastavíme
         setHistoData(cachedHistoData);
-      } else { //Pokud ne, získáme je z API a nastavíme
-        await axios.get(`/api/proxy?url=${encodeURIComponent(hisUrl)}`).then((response) => {
+      } else {
+        await axios.get(hisUrl).then((response) => { //`/api/proxy?url=${encodeURIComponent(hisUrl)}`
           setHistoData(response.data);
           localStorage.setItem(
             hisUrl,
@@ -260,7 +272,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   const back = <><Button onClick={() => setDtail(false)}>Zpet na seznam</Button>
     <br /></>;
-  if (hPriceAssigned && sum && curPrice && profitloss) {
+  if (hPriceAssigned && sum && curPrice && profitloss && curPriceChange24h && curPriceChange30d && curPriceChange1y) {
     return (
       <div>
         {back}
@@ -277,8 +289,32 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
               <Typography color={profitloss >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="2%"><NumericFormat value={Math.round(profitloss / ref.current * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography><Divider />
             </Grid>
           </Grid>
-          <Grid item xs={1}><Typography variant="h5" textAlign="center">Aktuální data</Typography></Grid>
+          <Grid item xs={1}><Typography paddingBottom="1%" variant="h5" textAlign="center">Aktuální data</Typography></Grid>
           <Grid container columns={1} spacing={2}>
+            <Grid item xs={1}>
+              <Typography>Rank kryptoměny: {rank}</Typography>
+            </Grid>
+            <Grid item xs={1}>
+              <Typography>
+                Změna ceny za 24h: <span style={{ color: curPriceChange24h >= 0 ? green[500] : red[900] }}>
+                  {Math.round(curPriceChange24h * 100) / 100} %
+                </span>
+              </Typography>
+            </Grid>
+            <Grid item xs={1}>
+              <Typography>
+                Změna ceny za měsíc: <span style={{ color: curPriceChange30d >= 0 ? green[500] : red[900] }}>
+                  {Math.round(curPriceChange30d * 100) / 100} %
+                </span>
+              </Typography>
+            </Grid>
+            <Grid item xs={1}>
+              <Typography>
+                Změna ceny za rok: <span style={{ color: curPriceChange1y >= 0 ? green[500] : red[900] }}>
+                  {Math.round(curPriceChange1y * 100) / 100} %
+                </span>
+              </Typography>
+            </Grid>
             <Grid item xs={1}>
               <Typography paddingTop="2%">Price for one: <NumericFormat value={curPrice} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
