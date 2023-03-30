@@ -297,21 +297,21 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
             <Grid item xs={1}>
               <Typography>
                 Změna ceny za 24h: <span style={{ color: curPriceChange24h >= 0 ? green[500] : red[900] }}>
-                  {Math.round(curPriceChange24h * 100) / 100} %
+                  {Math.round(curPriceChange24h * 1000) / 1000} %
                 </span>
               </Typography>
             </Grid>
             <Grid item xs={1}>
               <Typography>
                 Změna ceny za měsíc: <span style={{ color: curPriceChange30d >= 0 ? green[500] : red[900] }}>
-                  {Math.round(curPriceChange30d * 100) / 100} %
+                  {Math.round(curPriceChange30d * 1000) / 1000} %
                 </span>
               </Typography>
             </Grid>
             <Grid item xs={1}>
               <Typography>
                 Změna ceny za rok: <span style={{ color: curPriceChange1y >= 0 ? green[500] : red[900] }}>
-                  {Math.round(curPriceChange1y * 100) / 100} %
+                  {Math.round(curPriceChange1y * 1000) / 1000} %
                 </span>
               </Typography>
             </Grid>
