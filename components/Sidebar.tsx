@@ -11,6 +11,8 @@ import { db } from "../firebase";
 import { useUserContext } from "./userContext";
 import Alert from '@mui/material/Alert';
 
+
+//Definice typů pro uchování dat o kryptoměnách
 type CryptoData = {
   id: string;
   name: string;
@@ -35,6 +37,8 @@ type Crypto = {
 };
 
 export const Sidebar: React.FC = () => {
+
+  // useStates pro uchování dat, získání userContextu
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [data, setData] = useState<CryptoData[]>([]);
   const [cryptos, setCryptos] = useState<Crypto[]>([]);
@@ -49,10 +53,11 @@ export const Sidebar: React.FC = () => {
   const [minDate, setMinDate] = useState();
   const [errorMessage, setErrorMessage] = useState<string>();
   
-
+  //URL pro získání dat z API
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
 
+  //Získání dat z cache
   const getCachedData = useMemo(() => {
     if (typeof window !== "undefined") {
       const cachedItem = localStorage.getItem(url);
@@ -66,10 +71,11 @@ export const Sidebar: React.FC = () => {
     return null;
   }, [url]);
 
+  //Načítání kryptoměn z API případně z cache
   useEffect(() => {
-    if (getCachedData) {
+    if (getCachedData) { //Pokud máme v cache data, tak je nastavíme
       setData(getCachedData);
-    } else {
+    } else { //Jinak získáme data z API pomocí axios a uložíme je do cache
       axios.get(url).then((response) => {
         setData(response.data);
         if (typeof window !== "undefined") {
@@ -82,6 +88,7 @@ export const Sidebar: React.FC = () => {
     }
   }, [url, getCachedData]);
 
+  //Získávání dat z databáze
   useEffect(() => {
     const collectionRef = collection(db, "cryptocurrencies");
     const q = query(collectionRef);
@@ -93,11 +100,14 @@ export const Sidebar: React.FC = () => {
     return unsubscribe;
   }, []);
 
+
+  //Nastavení seznamu položek na základě dat
   useEffect(() => {
     const items = data.map((d) => ({ name: d.name, img: d.image }));
     setListItems(items);
   }, [data]);
 
+  //Nastavení symbolu, obrázku a id kryptoměny podle jména
   useEffect(() => {
     const selectedCrypto = data.find((d) => d.name === cryptoName);
     if (selectedCrypto) {
@@ -107,11 +117,13 @@ export const Sidebar: React.FC = () => {
     }
   }, [cryptoName, data]);
 
+  //Funkce pro zpracování formuláře a přidání kryptoměny do databáze
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     pushToDb();
   };
 
+  //Funkce pro kontrolu validního datumu
   const isNotInFuture = (dateValue: string) => {
     if (dateValue) {
       const inputDate = new Date(dateValue);
@@ -138,10 +150,12 @@ export const Sidebar: React.FC = () => {
     return false;
   };
 
+  //Kontrola validního čísla
   const isPositiveNumber = (value: number) => {
     return !isNaN(value) && value > 0;
   };
 
+  //Funkce pro přidání do databáze
   const pushToDb = async () => {
     if (numberOfCrypto && isPositiveNumber(numberOfCrypto) && isNotInFuture(dateValue)) {
       const docRef = await addDoc(collection(db, "cryptocurrencies"), {

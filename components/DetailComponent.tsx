@@ -10,12 +10,36 @@ import { green, red } from "@mui/material/colors";
 import { HistoricChart } from "./HistoricChart";
 import { Chart } from "./Chart";
 
+
+//Definice typů
 interface DetailComponentProps {
   setDtail: (value: boolean) => void;
   cName: string;
 }
 
+type HistoData = {
+  prices: [number, number | null][];
+  market_caps: [number, number | null][];
+  total_volumes: [number, number | null][];
+};
+
+
+type Crypto = {
+  id: string;
+  name?: string;
+  userId?: string;
+  nameId: any;
+  img: any;
+  value: any;
+  timestamp: any;
+  historical_price?: any;
+  historical_tvolume?: any;
+  historical_mcap?: any;
+};
+
 export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cName }) => {
+
+  //useStates pro získání userContextu, uchovávání dat a stavu aplikace(dtail) 
   const { user } = useUserContext()
 
   const [cryptos, setCryptos] = useState<Crypto[]>([]);
@@ -31,6 +55,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
   const [urlId, setUrlId] = useState();
 
   const [hPriceAssigned, setHPriceAssigned] = useState<boolean>(false);
+  const [hMCapAssigned, setHMCapAssigned] = useState<boolean>(false);
+  const [hTVolAssigned, setHTVolAssigned] = useState<boolean>(false);
 
   const [url, setUrl] = useState<string>("");
   const [hisUrl, setHisUrl] = useState(
@@ -40,26 +66,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   const [profitloss, setProfitloss] = useState<number>();
 
-  type HistoData = {
-    prices: [number, number | null][];
-    market_caps: [number, number | null][];
-    total_volumes: [number, number | null][];
-  };
-  
 
-  type Crypto = {
-    id: string;
-    name?: string;
-    userId?: string;
-    nameId: any;
-    img: any;
-    value: any;
-    timestamp: any;
-    historical_price?: any;
-    historical_tvolume?: any;
-    historical_mcap?: any;
-  };
-
+  //Získávání dat z databáze
   useEffect(() => {
     if (user?.user.uid) {
       const collectionRef = collection(db, "cryptocurrencies");
@@ -73,6 +81,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     }
   }, [user?.user.uid]);
 
+  //Nastavení id, obrázku a celkového počtu vlastněné kryptoměny
   useEffect(() => {
     cryptos.forEach((crypto) => {
       if (crypto.name == cName) {
@@ -84,6 +93,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     setSum(cryptos.reduce((acc, { value }) => acc + parseFloat(value), 0));
   }, [cryptos]);
 
+
+  //Nastavení URL pro API
   useEffect(() => {
     if (urlId != null) {
       setHisUrl(
@@ -95,10 +106,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     }
   }, [urlId]);
 
-
-  const regex = /\/(?!.*undefined)(.*)\?/;
-
-
+  //Získávání dat z cache
   const cachedData = useMemo(() => {
     const cachedItem = localStorage.getItem(url);
     if (cachedItem) {
@@ -110,7 +118,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     return null;
   }, [url]);
 
-
+  //Získávání dat z cache
   const cachedHistoData = useMemo(() => {
     const cachedItem = localStorage.getItem(hisUrl);
     if (cachedItem) {
@@ -122,19 +130,19 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     return null;
   }, [hisUrl]);
 
-
-
-
-
+  //Nastavení aktuálních dat
   useEffect(() => {
     getCurData();
   }, [url, cachedData]);
 
+  const regex = /\/(?!.*undefined)(.*)\?/;
+
+  //Funkce pro získání a nastavení dat
   const getCurData = async () => {
-    if (url.match(regex)) {
-      if (cachedData) {
+    if (url.match(regex)) { //Zkontroluje jestli má URL správný formát
+      if (cachedData) { //Pokud jsou v cache data, tak je nastavíme
         setCurData(cachedData);
-      } else {
+      } else { //Pokud ne, získáme je z API a nastavíme
         await axios.get(`/api/proxy?url=${encodeURIComponent(url)}`).then((response) => {
           setCurData(response.data);
           localStorage.setItem(
@@ -143,7 +151,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
           );
         });
       }
-      if(curData) {
+      if(curData) { //Nastavíme aktuální data
         setCurPrice(curData.market_data.current_price["czk"]);
         setCurMCap(curData.market_data.market_cap["czk"]);
         setCurTVolume(curData.market_data.total_volume["czk"]);
@@ -152,6 +160,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
   };
 
 
+  //Nastavíme aktuální data
   useEffect(() => {
     if (curData) {
       setCurPrice(curData.market_data.current_price["czk"]);
@@ -160,11 +169,13 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     }
   }, [curData]);
 
+
+  //Funkce pro získání a nastavení historických dat
   const getHistoData = async () => {
-    if (hisUrl.match(regex)) {
-      if (cachedHistoData) {
+    if (hisUrl.match(regex)) { //Zkontroluje jestli má URL správný formát
+      if (cachedHistoData) { //Pokud jsou v cache data, tak je nastavíme
         setHistoData(cachedHistoData);
-      } else {
+      } else { //Pokud ne, získáme je z API a nastavíme
         await axios.get(`/api/proxy?url=${encodeURIComponent(hisUrl)}`).then((response) => {
           setHistoData(response.data);
           localStorage.setItem(
@@ -176,12 +187,12 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     }
   };
 
-  
+  //Zavolání funkce pro získání a nastavení dat
   useEffect(() => {
     getHistoData();
   }, [hisUrl, cachedHistoData]);
 
-
+  //Funkce pro mazání kryptoměny z databáze
   const deleteFromDb = async (id: string) => {
     const docRef = doc(db, "cryptocurrencies", id);
     deleteDoc(docRef)
@@ -194,9 +205,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
       })
   };
 
-
-
-
+  //Nastavení historických dat
   useEffect(() => {
     if(histoData) {
       cryptos.forEach(crypto => {
@@ -217,7 +226,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
             value.forEach(val => {
               if (val[1] != null && val[0] == tstamp) {
 
-                setHPriceAssigned(true);
+                setHMCapAssigned(true);
                 crypto.historical_mcap = val[1];
               }
             });
@@ -226,7 +235,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
             value.forEach(val => {
               if (val[1] != null && val[0] == tstamp) {
 
-                setHPriceAssigned(true);
+                setHTVolAssigned(true);
                 crypto.historical_tvolume = val[1];
               }
             });
@@ -237,7 +246,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
   }, [histoData]);
 
 
-
+  //Nastavení profit/loss
   useEffect(() => {
     if (sum && hPriceAssigned && curPrice) {
       cryptos.forEach(crypto => {

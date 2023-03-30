@@ -3,18 +3,24 @@ import { createChart } from 'lightweight-charts';
 import styles from '../styles/Home.module.css';
 import { green, red} from "@mui/material/colors";
 
+
+//Interface pro React.FC
 interface ChartProps {
   data: any;
   profitloss: number;
 }
 
 export const Chart: React.FC<ChartProps> = ({ data, profitloss }) => {
+
+  //useStates pro nastavení dat a získání chartRefs
   const [chartData, setChartData] = useState<{ time: number; value: number }[]>();
   const [lineColor, setLineColor] = useState<string>();
 
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<any>();
 
+
+  //Nastavení chart dat a barvy linky
   useEffect(() => {
     if (data) {
       setChartData(data.map(([time, value]: [number, number]) => ({ time: time / 1000, value })));
@@ -27,6 +33,8 @@ export const Chart: React.FC<ChartProps> = ({ data, profitloss }) => {
     }
   }, [data]);
 
+
+  //Vytvoření grafu
   useEffect(() => {
     if (chartData && chartData.length > 0 && profitloss !== undefined) {
       chartInstanceRef.current = createChart(chartRef.current!, {

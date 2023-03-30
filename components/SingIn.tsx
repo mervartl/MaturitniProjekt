@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Alert from '@mui/material/Alert';
 
+//Vytvoření tmavého tématu
 const theme = createTheme({
     palette: {
         mode: 'dark',
@@ -23,21 +24,24 @@ const theme = createTheme({
 
 export default function SignIn() {
 
+    //Získání routeru a userContextu pro operaci s Firebase
     const router = useRouter();
-
     const { user, login } = useUserContext();
+
+    //useStates pro zpracování a nastavení emailu a hesla ve formuláři a error zprávy
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
 
-
+    //Funkce pro odeslání formuláře a přihlášení uživatele
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         await handleLogin();
     };
 
+    //Funkce pro zpracování přihlášení
     const handleLogin = async () => {
         const response = await login?.(email, password);
         if (response?.error) {
@@ -47,13 +51,14 @@ export default function SignIn() {
         }
     };
 
-
+    //Pokud je uživatel už přihlášen, přesměruje na hlavní stranu
     useEffect(() => {
         if (user?.user.uid) {
             router.push("/cryptolium");
         }
     },[]);
 
+    //Pokud se hodnota uživatele nějak změní, uživatel je přesměrován na hlavní stranu 
     useEffect(() => {
         if (user?.user.uid) {
             router.push("/cryptolium");

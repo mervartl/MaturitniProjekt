@@ -3,6 +3,8 @@ import { createChart, IChartApi } from 'lightweight-charts';
 import styles from '../styles/Home.module.css';
 import { green, red } from '@mui/material/colors';
 
+
+//Interface pro React.FC
 interface ChartProps {
   data: any;
   timestamp: string;
@@ -10,12 +12,15 @@ interface ChartProps {
 }
 
 export const HistoricChart: React.FC<ChartProps> = ({ data, timestamp, profitloss }) => {
+
+  //useStates pro nastavení dat a získání chartRefs
   const [chartData, setChartData] = useState();
   const [lineColor, setLineColor] = useState<string>();
 
   const chartRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<IChartApi | undefined>(undefined);
 
+  //Nastavení chart dat a barvy linky
   useEffect(() => {
     if (data) {
       const date = new Date(timestamp);
@@ -34,6 +39,8 @@ export const HistoricChart: React.FC<ChartProps> = ({ data, timestamp, profitlos
     }
   }, [data]);
 
+
+  //Vytvoření grafu
   useEffect(() => {
     if (chartData && profitloss && chartRef.current) {
       chartInstanceRef.current = createChart(chartRef.current, {

@@ -13,6 +13,7 @@ const Table = dynamic(() => import("@mui/material/Table"), {
     ssr: false,
 });
 
+//Definice typů
 type Crypto = {
   id: string;
   symbol: any;
@@ -28,6 +29,7 @@ type HistoDataCache = {
 
 export const MainListComponent: React.FC = () => {
 
+    //useStates pro získání userContextu, uchovávání dat a stavu aplikace(dtail, loading)
     const { user } = useUserContext();
     const [cryptos, setCryptos] = useState<Crypto[] | undefined>(undefined);
     const [data, setData] = useState<any>();
@@ -40,9 +42,11 @@ export const MainListComponent: React.FC = () => {
 
     const [loading, setLoading] = useState(true);
 
-
+    //URL pro získávání dat z API
     const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
 
+
+    //Získávání dat z cache
     const cachedData = useMemo(() => {
         if (typeof window !== "undefined") {
           const cachedItem = localStorage.getItem(url);
@@ -56,10 +60,11 @@ export const MainListComponent: React.FC = () => {
         return null;
       }, [url]);
     
+      //Načítání kryptoměn z API případně z cache
       useEffect(() => {
-        if (cachedData) {
+        if (cachedData) { //Pokud máme v cache data, tak je nastavíme
           setData(cachedData);
-        } else {
+        } else { //Jinak získáme data z API pomocí axios a uložíme je do cache
           axios.get(url).then((response) => {
             setData(response.data);
             if (typeof window !== "undefined") {
@@ -72,6 +77,7 @@ export const MainListComponent: React.FC = () => {
         }
       }, [url, cachedData]);
 
+      //Získávání dat z databáze
       useEffect(() => {
         if (user?.user.uid) {
           const collectionRef = collection(db, "cryptocurrencies");
@@ -87,11 +93,10 @@ export const MainListComponent: React.FC = () => {
         }
       }, [user?.user.uid]);
 
-
-
-
+    //Vytvoření cache pro historická data
     const histoDataCache: HistoDataCache = useMemo(() => ({}), []);
-
+    
+    //Spouští funkci getCrypto pokud máme ready cache a data z databáze
     useEffect(() => {
         if(cryptos)
         {
@@ -99,23 +104,23 @@ export const MainListComponent: React.FC = () => {
         }
     }, [cryptos, histoDataCache]);
 
-
+    //Funkce pro získávání historických dat kryptoměny
     const getCrypto = () => {
         if (cryptos) {
             cryptos.forEach(crypto => {
-                const hisUrl = `https://api.coingecko.com/api/v3/coins/${crypto.nameId}/market_chart?vs_currency=czk&days=max&interval=daily`;
+                const hisUrl = `https://api.coingecko.com/api/v3/coins/${crypto.nameId}/market_chart?vs_currency=czk&days=max&interval=daily`; //URL pro získání dat z API
 
-                if (histoDataCache[hisUrl]) {
+                if (histoDataCache[hisUrl]) { //Pokud máme v cache data, tak je nastavíme
                     const histoData = histoDataCache[hisUrl];
-                    updateCryptoHistoricalPrice(crypto, histoData);
-                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0));
-                } else {
+                    updateCryptoHistoricalPrice(crypto, histoData); 
+                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0)); //Nastavíme součet cen za které jsme jednotlivé kryptoměny nakoupili
+                } else { //Pokud ne, získáme data z api
                     axios.get(hisUrl).then(response => {
                         const histoData = response.data;
                         if (histoData) {
                             histoDataCache[hisUrl] = histoData;
                             updateCryptoHistoricalPrice(crypto, histoData);
-                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0));
+                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0)); //Nastavíme součet cen za které jsme jednotlivé kryptoměny nakoupili
                         }
                     });
                 }
@@ -123,6 +128,7 @@ export const MainListComponent: React.FC = () => {
         }
     };
 
+    //Funkce pro přidání historické ceny kryptoměny
     const updateCryptoHistoricalPrice = (crypto: any, histoData: any) => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
@@ -139,7 +145,7 @@ export const MainListComponent: React.FC = () => {
     };
 
     
-
+    //Získání aktuální ceny kryptoměny
     useEffect(()=>{
       const getCurPrice = () => {
         if (cryptos && data) {
@@ -158,14 +164,9 @@ export const MainListComponent: React.FC = () => {
     },[data]);    
 
 
+    //Funkce pro spojení počtu vlastnených kryptoměn se stejným id, ale přidáné v jiný čas a její nastavení
     useEffect(() => {
-      if(cryptos)
-      {
-        setCryptoObj(mergeOb(cryptos));
-      }       
-    }, [cryptos]);
-
-    const mergeOb = (objects: any) => {
+      const mergeOb = (objects: any) => {
         const mergedObjects: any[] = [];
       
         objects.forEach((obj: { name: any; value: any; }) => {
@@ -180,7 +181,14 @@ export const MainListComponent: React.FC = () => {
         return mergedObjects;
       }
 
+      if(cryptos)
+      {
+        setCryptoObj(mergeOb(cryptos));
+      }       
+    }, [cryptos]);
 
+
+    //Získání aktuální hodnoty portfolia
     useEffect(() => {
         if(cryptoObj)
         {
@@ -189,6 +197,7 @@ export const MainListComponent: React.FC = () => {
     },[cryptoObj]);
 
 
+    //Nastavení profit/loss
     useEffect(()=>{
         if(histoCryptoSum)
         {
@@ -197,7 +206,7 @@ export const MainListComponent: React.FC = () => {
         }
     },[histoCryptoSum]);
     
-
+    //handler pro kliknutí na tlačítko detail a nastavení jména které se předá do komponenty DetailComponent
     const onButtonClick = (name: string) => {
         setCName(name);
         setDtail(true);
