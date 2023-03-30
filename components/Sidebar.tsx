@@ -51,8 +51,8 @@ export const Sidebar: React.FC = () => {
   const [cryptoNameId, setCryptoNameId] = useState("");
 
   const [minDate, setMinDate] = useState();
-  const [errorMessage, setErrorMessage] = useState<string>();
-  
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   //URL pro získání dat z API
   const url =
     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false";
@@ -133,20 +133,17 @@ export const Sidebar: React.FC = () => {
         const dat = response;
         setMinDate(dat.data.prices[0][0]);
       });
-      if(minDate)
-      {
-        if(inputDate > now)
-        {
-          setErrorMessage("Datum je budoucnosti.");
+      if (minDate) {
+        if (inputDate > now) {
+          setErrorMessage("Datum je v budoucnosti! Zadej správné datum.");
         }
-        if(inputDate < minDate)
-        {
-          setErrorMessage("Datum je v minulosti.");
+        if (inputDate < minDate) {
+          setErrorMessage("Datum je v minulosti! Zadej správné datum.");
         }
 
         return inputDate <= now && inputDate >= minDate;
-      }     
-    }   
+      }
+    }
     return false;
   };
 

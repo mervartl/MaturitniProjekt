@@ -80,10 +80,16 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
         setCryptos(
           querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
         );
+        updateData();
       });
       return unsubscribe;
     }
   }, [user?.user.uid]);
+
+  const updateData = async () => {
+    getCurData();
+    getHistoData();
+  };
 
   //Nastavení id, obrázku a celkového počtu vlastněné kryptoměny
   useEffect(() => {
@@ -155,7 +161,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
           );
         });
       }
-      if(curData) { //Nastavíme aktuální data
+      if (curData) { //Nastavíme aktuální data
         setCurPrice(curData.market_data.current_price["czk"]);
         setCurMCap(curData.market_data.market_cap["czk"]);
         setCurTVolume(curData.market_data.total_volume["czk"]);
@@ -177,7 +183,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
       setCurPriceChange24h(curData.market_data.price_change_percentage_24h);
       setCurPriceChange30d(curData.market_data.price_change_percentage_30d);
       setCurPriceChange1y(curData.market_data.price_change_percentage_1y);
-      setRank(curData.market_cap_rank);  
+      setRank(curData.market_cap_rank);
     }
   }, [curData]);
 
@@ -219,7 +225,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
   //Nastavení historických dat
   useEffect(() => {
-    if(histoData) {
+    if (histoData) {
       cryptos.forEach(crypto => {
         const date = new Date(crypto.timestamp);
         const tstamp = date.getTime();
@@ -328,17 +334,17 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
               <Typography>Total volume: <NumericFormat value={curTVolume} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</Typography>
             </Grid>
             <Grid item xs={1} paddingBottom="2%">
-              <Chart data={histoData?.prices} profitloss={profitloss}/><Divider />
+              <Chart data={histoData?.prices} profitloss={profitloss} /><Divider />
             </Grid>
           </Grid>
-        </Grid>   
+        </Grid>
         {cryptos.map(crypto =>
         (<Grid container columns={1} spacing={1} key={crypto.id}>
           <Grid item xs={1} textAlign="center">
             <Typography variant="h5" paddingTop="2%" >{crypto.value} {cName} <img src={img} height="20px"></img> koupený dne {moment(crypto.timestamp).format("D MMMM YYYY")}</Typography><Button onClick={() => deleteFromDb(crypto.id)}>Delete</Button>
             <Grid container columns={1} spacing={2}>
               <Grid item xs={1}>
-              <Typography variant="h5" textAlign="center">Profit/Lose</Typography>
+                <Typography variant="h5" textAlign="center">Profit/Lose</Typography>
                 <Typography color={(curPrice * crypto.value - crypto.historical_price * crypto.value) >= 0 ? green[500] : red[900]} variant="h4" paddingBottom="0.5%"><NumericFormat value={Math.round((curPrice * crypto.value - crypto.historical_price * crypto.value) * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
                 <Typography color={(curPrice * crypto.value - crypto.historical_price * crypto.value) >= 0 ? green[500] : red[900]} variant="h4"><NumericFormat value={Math.round((curPrice * crypto.value - crypto.historical_price * crypto.value) / (crypto.value * crypto.historical_price) * 100 * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> %</Typography>
               </Grid>
@@ -352,7 +358,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
                 <Typography>Price vlastněných total dnes: <NumericFormat value={Math.round(curPrice * crypto.value * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," /> Kč</Typography>
               </Grid>
               <Grid item xs={1} paddingBottom="4%">
-                <HistoricChart data={histoData?.prices} timestamp={crypto.timestamp} profitloss={(curPrice * crypto.value - crypto.historical_price * crypto.value)}/><Divider />
+                <HistoricChart data={histoData?.prices} timestamp={crypto.timestamp} profitloss={(curPrice * crypto.value - crypto.historical_price * crypto.value)} /><Divider />
               </Grid>
             </Grid>
           </Grid>
