@@ -146,8 +146,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     if (url.match(regex)) { //Zkontroluje jestli má URL správný formát
       if (cachedData) { //Pokud jsou v cache data, tak je nastavíme
         setCurData(cachedData);
-      } else {
-        await axios.get(url).then((response) => { //`/api/proxy?url=${encodeURIComponent(url)}`
+      } else { //Pokud ne, získáme je z API a nastavíme a vložíme do cache
+        await axios.get(url).then((response) => {
           setCurData(response.data);
           localStorage.setItem(
             url,
@@ -187,8 +187,8 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     if (hisUrl.match(regex)) { //Zkontroluje jestli má URL správný formát
       if (cachedHistoData) { //Pokud jsou v cache data, tak je nastavíme
         setHistoData(cachedHistoData);
-      } else {
-        await axios.get(hisUrl).then((response) => { //`/api/proxy?url=${encodeURIComponent(hisUrl)}`
+      } else { //Pokud ne, získáme je z API a nastavíme a vložíme do cache 
+        await axios.get(hisUrl).then((response) => {
           setHistoData(response.data);
           localStorage.setItem(
             hisUrl,
