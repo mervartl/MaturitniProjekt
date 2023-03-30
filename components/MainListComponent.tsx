@@ -161,7 +161,7 @@ export const MainListComponent: React.FC = () => {
       if(cryptos){
         getCurPrice();
       }
-    },[data]);    
+    },[cryptos]);    
 
 
     //Funkce pro spojení počtu vlastnených kryptoměn se stejným id, ale přidáné v jiný čas a její nastavení

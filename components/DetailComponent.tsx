@@ -80,16 +80,10 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
         setCryptos(
           querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
         );
-        updateData();
       });
       return unsubscribe;
     }
   }, [user?.user.uid]);
-
-  const updateData = async () => {
-    getCurData();
-    getHistoData();
-  };
 
   //Nastavení id, obrázku a celkového počtu vlastněné kryptoměny
   useEffect(() => {
@@ -263,9 +257,9 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
     }
   }, [histoData]);
 
-
-  //Nastavení profit/loss
-  useEffect(() => {
+  //Funkce pro nastavení profit/loss
+  const getProfitLoss = () =>
+  {
     if (sum && hPriceAssigned && curPrice) {
       cryptos.forEach(crypto => {
         ref.current = ref.current + (crypto.value * crypto.historical_price);
@@ -273,6 +267,11 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
 
       setProfitloss((curPrice * sum) - ref.current);
     }
+  }
+
+  //Nastavení profit/loss
+  useEffect(() => {
+    getProfitLoss();
   }, [hPriceAssigned, curPrice]);
 
 
