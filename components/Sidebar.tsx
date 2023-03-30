@@ -50,7 +50,6 @@ export const Sidebar: React.FC = () => {
   const [cryptoImg, setCryptoImg] = useState("");
   const [cryptoNameId, setCryptoNameId] = useState("");
 
-  const [minDate, setMinDate] = useState();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   //URL pro získání dat z API
@@ -124,24 +123,24 @@ export const Sidebar: React.FC = () => {
   };
 
   //Funkce pro kontrolu validního datumu
-  const isNotInFuture = (dateValue: string) => {
+  const isNotInFuture = async (dateValue: string) => {
     if (dateValue) {
       const inputDate = new Date(dateValue);
       const now = new Date();
-
-      axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`).then((response) => {
-        const dat = response;
-        setMinDate(dat.data.prices[0][0]);
+      let localMinDate;
+  
+      await axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`).then((response) => {
+        localMinDate = response.data.prices[0][0];
       });
-      if (minDate) {
+  
+      if (localMinDate) {
         if (inputDate > now) {
           setErrorMessage("Datum je v budoucnosti! Zadej správné datum.");
         }
-        if (inputDate < minDate) {
+        if (inputDate < localMinDate) {
           setErrorMessage("Datum je v minulosti! Zadej správné datum.");
         }
-
-        return inputDate <= now && inputDate >= minDate;
+        return inputDate <= now && inputDate >= localMinDate;
       }
     }
     return false;
@@ -154,7 +153,8 @@ export const Sidebar: React.FC = () => {
 
   //Funkce pro přidání do databáze
   const pushToDb = async () => {
-    if (numberOfCrypto && isPositiveNumber(numberOfCrypto) && isNotInFuture(dateValue)) {
+    console.log(dateValue);
+    if (numberOfCrypto && isPositiveNumber(numberOfCrypto) && await isNotInFuture(dateValue)) {
       const docRef = await addDoc(collection(db, "cryptocurrencies"), {
         img: cryptoImg,
         name: cryptoName,
