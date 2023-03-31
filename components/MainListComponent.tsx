@@ -91,10 +91,9 @@ export const MainListComponent: React.FC = () => {
         } else {
           setLoading(false);
         }
-      }, [user?.user.uid]);    
-    
-    //Získání aktuální ceny kryptoměny
-    useEffect(()=>{
+      }, [user?.user.uid]);   
+      
+      //funkce pro získání aktuálni ceny krypta
       const getCurPrice = () => {
         if (cryptos && data) {
           cryptos.forEach((crypto) => {
@@ -107,12 +106,15 @@ export const MainListComponent: React.FC = () => {
           setReady(true);
         }
       };
-      if(cryptos && !dataLoading){
+
+    
+    //Získání aktuální ceny kryptoměny
+    useEffect(()=>{
+      if(cryptos){
         getCurPrice();
         setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
       }
     },[data, cryptos]);    
-
 
     //Funkce pro spojení počtu vlastnených kryptoměn se stejným id, ale přidáné v jiný čas a její nastavení
     useEffect(() => {
@@ -136,6 +138,14 @@ export const MainListComponent: React.FC = () => {
         setCryptoMerged(mergeOb(cryptos));
       }       
     }, [cryptos]);
+
+    //Získání aktuální ceny krypta
+    useEffect(()=>{
+      if(!dataLoading)
+      {
+        getCurPrice();
+      }
+    },[dataLoading, data]);
 
 
     //Získání aktuální hodnoty portfolia
