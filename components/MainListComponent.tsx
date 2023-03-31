@@ -35,6 +35,7 @@ export const MainListComponent: React.FC = () => {
     const [cName, setCName] = useState<string>("");
     const [dtail, setDtail] = useState(false);
     const [profitloss, setProfitloss] = useState<number>(0);
+    const [ready, setReady] = useState<boolean>(false);
 
     const [loading, setLoading] = useState(true);
 
@@ -100,6 +101,7 @@ export const MainListComponent: React.FC = () => {
               }
             });
           });
+          setReady(true);
         }
       };
       if(cryptos){
@@ -160,7 +162,7 @@ export const MainListComponent: React.FC = () => {
 
     const div = <div>
         {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
-            (user ? (
+            (user && ready? (
             <div>
             <Typography display="inline" variant="h4">Celkový P/L: </Typography> 
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{profitloss > 0 ? "+" : ""}{Math.round(profitloss * 100) / 100} Kč </Typography>
