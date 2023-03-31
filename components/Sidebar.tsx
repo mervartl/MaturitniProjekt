@@ -48,8 +48,8 @@ export const Sidebar: React.FC = () => {
   const [cryptoSymbol, setCryptoSymbol] = useState("");
   const [cryptoImg, setCryptoImg] = useState("");
   const [cryptoNameId, setCryptoNameId] = useState("");
-  const [histoCryptoSum, setHistoCryptoSum] = useState<number>(0);
   const [histoPrice, setHistoPrice] = useState<number>(0);
+  const [minDate, setMinDate] = useState<Date>();
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -131,25 +131,15 @@ export const Sidebar: React.FC = () => {
     if (dateValue) {
       const inputDate = new Date(dateValue);
       const now = new Date();
-      let localMinDate;
 
-      await axios
-        .get(
-          `https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`
-        )
-        .then((response) => {
-          localMinDate = response.data.prices[0][0];
-          updateCryptoHistoricalPrice(inputDate, response.data);
-        });
-
-      if (localMinDate) {
+      if (minDate) {
         if (inputDate > now) {
           setErrorMessage("Datum je v budoucnosti! Zadej správné datum.");
         }
-        if (inputDate < localMinDate) {
+        if (inputDate < minDate) {
           setErrorMessage("Datum je v minulosti! Zadej správné datum.");
         }
-        return inputDate <= now && inputDate >= localMinDate;
+        return inputDate <= now && inputDate >= minDate;
       }
     }
     return false;
@@ -159,6 +149,18 @@ export const Sidebar: React.FC = () => {
   const isPositiveNumber = (value: number) => {
     return !isNaN(value) && value > 0;
   };
+
+  useEffect(()=>{
+  if(dateValue && cryptoNameId)
+  {
+    const inputDate = new Date(dateValue);
+
+    axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`).then((response) => {
+      setMinDate(response.data.prices[0][0]);
+      updateCryptoHistoricalPrice(inputDate, response.data);
+    });
+  }
+  },[cryptoNameId, dateValue]);
 
   //Funkce pro přidání historické ceny kryptoměny
   const updateCryptoHistoricalPrice = (timestamp: any, histoData: any) => {
@@ -178,7 +180,6 @@ export const Sidebar: React.FC = () => {
 
   //Funkce pro přidání do databáze
   const pushToDb = async () => {
-    console.log(dateValue);
     if (
       numberOfCrypto &&
       isPositiveNumber(numberOfCrypto) &&
