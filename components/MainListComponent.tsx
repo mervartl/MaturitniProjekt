@@ -149,7 +149,7 @@ export const MainListComponent: React.FC = () => {
             setProfitloss(cryptoSum - histoCryptoSum);
             setLoading(false);
         }
-    },[histoCryptoSum]);
+    },[cryptoSum]);
     
     //handler pro kliknutí na tlačítko detail a nastavení jména které se předá do komponenty DetailComponent
     const onButtonClick = (name: string) => {
