@@ -150,6 +150,7 @@ export const Sidebar: React.FC = () => {
     return !isNaN(value) && value > 0;
   };
 
+  //Získání historických dat
   useEffect(()=>{
   if(dateValue && cryptoNameId)
   {

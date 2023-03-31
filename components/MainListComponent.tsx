@@ -93,19 +93,19 @@ export const MainListComponent: React.FC = () => {
         }
       }, [user?.user.uid]);   
       
-      //funkce pro získání aktuálni ceny krypta
+      //Funkce pro získání aktuálni ceny krypta
       const getCurPrice = () => {
         if (cryptos && data) {
-          cryptos.forEach((crypto) => {
-            data.forEach((dat: any) => {
-              if (crypto.symbol == dat.symbol) {
-                crypto.current_price = dat.current_price;
-              }
+            let updatedCryptos = cryptos.map((crypto) => {
+                const matchedData = data.find((dat: any) => crypto.symbol === dat.symbol);
+                if (matchedData) {
+                    crypto.current_price = matchedData.current_price;
+                }
+                return crypto;
             });
-          });
-          setReady(true);
+            setCryptos(updatedCryptos);
         }
-      };
+    };
 
     
     //Získání aktuální ceny kryptoměny
@@ -144,6 +144,7 @@ export const MainListComponent: React.FC = () => {
       if(!dataLoading)
       {
         getCurPrice();
+        setReady(true);
       }
     },[dataLoading, data]);
 
