@@ -164,8 +164,8 @@ export const MainListComponent: React.FC = () => {
     
 
     const div = <div>
-        {loading || dataLoading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
-            (user && ready? (
+        {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
+            (user && ready && !dataLoading ? (
             <div>
             <Typography display="inline" variant="h4">Celkový P/L: </Typography> 
             <Typography display="inline" variant="h4" color={profitloss >= 0 ? green[500] : red[900]}>{profitloss > 0 ? "+" : ""}{Math.round(profitloss * 100) / 100} Kč </Typography>
