@@ -30,13 +30,14 @@ export const MainListComponent: React.FC = () => {
     const [cryptos, setCryptos] = useState<Crypto[] | undefined>(undefined);
     const [data, setData] = useState<any>();
     const [cryptoSum, setCryptoSum] = useState<number>(0);
-    const [cryptoObj, setCryptoObj] = useState<any>();
+    const [cryptoMerged, setCryptoMerged] = useState<any>();
     const [histoCryptoSum, setHistoCryptoSum] = useState<number>(0);
     const [cName, setCName] = useState<string>("");
     const [dtail, setDtail] = useState(false);
     const [profitloss, setProfitloss] = useState<number>(0);
-    const [ready, setReady] = useState<boolean>(false);
 
+    const [ready, setReady] = useState<boolean>(false);
+    const [dataLoading, setDataLoading] = useState(true);
     const [loading, setLoading] = useState(true);
 
     //URL pro získávání dat z API
@@ -61,9 +62,11 @@ export const MainListComponent: React.FC = () => {
       useEffect(() => {
         if (cachedData) { //Pokud máme v cache data, tak je nastavíme
           setData(cachedData);
+          setDataLoading(false);
         } else { //Jinak získáme data z API pomocí axios a uložíme je do cache
           axios.get(url).then((response) => {
             setData(response.data);
+            setDataLoading(false);
             if (typeof window !== "undefined") {
               localStorage.setItem(
                 url,
@@ -104,7 +107,7 @@ export const MainListComponent: React.FC = () => {
           setReady(true);
         }
       };
-      if(cryptos){
+      if(cryptos && !dataLoading){
         getCurPrice();
         setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
       }
@@ -130,18 +133,18 @@ export const MainListComponent: React.FC = () => {
 
       if(cryptos)
       {
-        setCryptoObj(mergeOb(cryptos));
+        setCryptoMerged(mergeOb(cryptos));
       }       
     }, [cryptos]);
 
 
     //Získání aktuální hodnoty portfolia
     useEffect(() => {
-        if(cryptoObj)
+        if(cryptoMerged)
         {
-          setCryptoSum(cryptoObj.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0));
+          setCryptoSum(cryptoMerged.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0));
         }  
-    },[cryptoObj]);
+    },[cryptoMerged]);
 
 
     //Nastavení profit/loss
@@ -161,7 +164,7 @@ export const MainListComponent: React.FC = () => {
     
 
     const div = <div>
-        {loading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
+        {loading || dataLoading ? <Typography variant="h5">Loading...</Typography> : (dtail ? (<DetailComponent setDtail={setDtail} cName={cName} />) :
             (user && ready? (
             <div>
             <Typography display="inline" variant="h4">Celkový P/L: </Typography> 
@@ -182,7 +185,7 @@ export const MainListComponent: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {user && cryptoObj ? (cryptoObj.map((crypto:any) => user.user.uid === crypto.userId ? (
+                        {user && cryptoMerged ? (cryptoMerged.map((crypto:any) => user.user.uid === crypto.userId ? (
                             <TableRow key={crypto.name}>
                                 <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
                                 <TableCell>{crypto.name}</TableCell>
