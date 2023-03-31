@@ -37,7 +37,6 @@ type Crypto = {
 };
 
 export const Sidebar: React.FC = () => {
-
   // useStates pro uchování dat, získání userContextu
   const [listItems, setListItems] = useState<ListItem[]>([]);
   const [data, setData] = useState<CryptoData[]>([]);
@@ -49,6 +48,8 @@ export const Sidebar: React.FC = () => {
   const [cryptoSymbol, setCryptoSymbol] = useState("");
   const [cryptoImg, setCryptoImg] = useState("");
   const [cryptoNameId, setCryptoNameId] = useState("");
+  const [histoCryptoSum, setHistoCryptoSum] = useState<number>(0);
+  const [histoPrice, setHistoPrice] = useState<number>(0);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -72,9 +73,11 @@ export const Sidebar: React.FC = () => {
 
   //Načítání kryptoměn z API případně z cache
   useEffect(() => {
-    if (getCachedData) { //Pokud máme v cache data, tak je nastavíme
+    if (getCachedData) {
+      //Pokud máme v cache data, tak je nastavíme
       setData(getCachedData);
-    } else { //Jinak získáme data z API pomocí axios a uložíme je do cache
+    } else {
+      //Jinak získáme data z API pomocí axios a uložíme je do cache
       axios.get(url).then((response) => {
         setData(response.data);
         if (typeof window !== "undefined") {
@@ -93,12 +96,13 @@ export const Sidebar: React.FC = () => {
     const q = query(collectionRef);
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       setCryptos(
-        querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
+        querySnapshot.docs.map(
+          (doc) => ({ ...doc.data(), id: doc.id } as Crypto)
+        )
       );
     });
     return unsubscribe;
   }, []);
-
 
   //Nastavení seznamu položek na základě dat
   useEffect(() => {
@@ -128,11 +132,16 @@ export const Sidebar: React.FC = () => {
       const inputDate = new Date(dateValue);
       const now = new Date();
       let localMinDate;
-  
-      await axios.get(`https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`).then((response) => {
-        localMinDate = response.data.prices[0][0];
-      });
-  
+
+      await axios
+        .get(
+          `https://api.coingecko.com/api/v3/coins/${cryptoNameId}/market_chart?vs_currency=czk&days=max&interval=daily`
+        )
+        .then((response) => {
+          localMinDate = response.data.prices[0][0];
+          updateCryptoHistoricalPrice(inputDate, response.data);
+        });
+
       if (localMinDate) {
         if (inputDate > now) {
           setErrorMessage("Datum je v budoucnosti! Zadej správné datum.");
@@ -151,10 +160,30 @@ export const Sidebar: React.FC = () => {
     return !isNaN(value) && value > 0;
   };
 
+  //Funkce pro přidání historické ceny kryptoměny
+  const updateCryptoHistoricalPrice = (timestamp: any, histoData: any) => {
+    const date = new Date(timestamp);
+    const tstamp = date.getTime();
+
+    Object.entries(histoData).forEach(([key, value]: [any, any]) => {
+      if (key === "prices") {
+        value.forEach((val: any[]) => {
+          if (val[1] !== null && val[0] === tstamp) {
+            setHistoPrice(val[1]);
+          }
+        });
+      }
+    });
+  };
+
   //Funkce pro přidání do databáze
   const pushToDb = async () => {
     console.log(dateValue);
-    if (numberOfCrypto && isPositiveNumber(numberOfCrypto) && await isNotInFuture(dateValue)) {
+    if (
+      numberOfCrypto &&
+      isPositiveNumber(numberOfCrypto) &&
+      (await isNotInFuture(dateValue))
+    ) {
       const docRef = await addDoc(collection(db, "cryptocurrencies"), {
         img: cryptoImg,
         name: cryptoName,
@@ -163,6 +192,7 @@ export const Sidebar: React.FC = () => {
         userId: user?.user?.uid,
         value: numberOfCrypto,
         nameId: cryptoNameId,
+        historical_price: histoPrice
       });
     } else {
       console.log("Číslo nebo datum není validní.");

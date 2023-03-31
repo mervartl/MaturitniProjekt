@@ -23,10 +23,6 @@ type Crypto = {
   historical_price: any;
 };
 
-type HistoDataCache = {
-  [key: string]: any;
-}
-
 export const MainListComponent: React.FC = () => {
 
     //useStates pro získání userContextu, uchovávání dat a stavu aplikace(dtail, loading)
@@ -91,59 +87,7 @@ export const MainListComponent: React.FC = () => {
         } else {
           setLoading(false);
         }
-      }, [user?.user.uid]);
-
-    //Vytvoření cache pro historická data
-    const histoDataCache: HistoDataCache = useMemo(() => ({}), []);
-    
-    //Spouští funkci getCrypto pokud máme ready cache a data z databáze
-    useEffect(() => {
-        if(cryptos)
-        {
-            getCrypto();
-        }
-    }, [cryptos, histoDataCache]);
-
-    //Funkce pro získávání historických dat kryptoměny
-    const getCrypto = () => {
-        if (cryptos) {
-            cryptos.forEach(crypto => {
-                const hisUrl = `https://api.coingecko.com/api/v3/coins/${crypto.nameId}/market_chart?vs_currency=czk&days=max&interval=daily`; //URL pro získání dat z API
-
-                if (histoDataCache[hisUrl]) { //Pokud máme v cache data, tak je nastavíme
-                    const histoData = histoDataCache[hisUrl];
-                    updateCryptoHistoricalPrice(crypto, histoData); 
-                    setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0)); //Nastavíme součet cen za které jsme jednotlivé kryptoměny nakoupili
-                } else { //Pokud ne, získáme data z api
-                    axios.get(hisUrl).then(response => {
-                        const histoData = response.data;
-                        if (histoData) {
-                            histoDataCache[hisUrl] = histoData;
-                            updateCryptoHistoricalPrice(crypto, histoData);
-                            setHistoCryptoSum(cryptos.reduce((acc: number, crypto) => acc + crypto.value * crypto.historical_price, 0)); //Nastavíme součet cen za které jsme jednotlivé kryptoměny nakoupili
-                        }
-                    });
-                }
-            });
-        }
-    };
-
-    //Funkce pro přidání historické ceny kryptoměny
-    const updateCryptoHistoricalPrice = (crypto: any, histoData: any) => {
-        const date = new Date(crypto.timestamp);
-        const tstamp = date.getTime();
-
-        Object.entries(histoData).forEach(([key, value] : [any, any]) => {
-            if (key === "prices") {
-                value.forEach((val: any[]) => {
-                    if (val[1] !== null && val[0] === tstamp) {
-                        crypto.historical_price = val[1];
-                    }
-                });
-            }
-        });
-    };
-
+      }, [user?.user.uid]);    
     
     //Získání aktuální ceny kryptoměny
     useEffect(()=>{
@@ -160,8 +104,9 @@ export const MainListComponent: React.FC = () => {
       };
       if(cryptos){
         getCurPrice();
+        setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
       }
-    },[cryptos]);    
+    },[data, cryptos]);    
 
 
     //Funkce pro spojení počtu vlastnených kryptoměn se stejným id, ale přidáné v jiný čas a její nastavení
@@ -192,7 +137,7 @@ export const MainListComponent: React.FC = () => {
     useEffect(() => {
         if(cryptoObj)
         {
-            setCryptoSum(cryptoObj.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0));
+          setCryptoSum(cryptoObj.reduce((acc: number, crypto: { value: number; current_price: number; }) => acc + crypto.value * crypto.current_price, 0));
         }  
     },[cryptoObj]);
 
