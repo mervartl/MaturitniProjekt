@@ -39,6 +39,7 @@ export const MainListComponent: React.FC = () => {
     const [ready, setReady] = useState<boolean>(false);
     const [dataLoading, setDataLoading] = useState(true);
     const [loading, setLoading] = useState(true);
+    const [dataChanged, setDataChanged] = useState(false);
 
     //URL pro získávání dat z API
     const url = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=czk&order=market_cap_desc&per_page=200&page=1&sparkline=false';
@@ -80,18 +81,19 @@ export const MainListComponent: React.FC = () => {
       //Získávání dat z databáze
       useEffect(() => {
         if (user?.user.uid) {
-          const collectionRef = collection(db, "cryptocurrencies");
-          const q = query(collectionRef, where("userId", "==", user.user.uid));
-          const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            setCryptos(
-              querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
-            );
-          });
-          return unsubscribe;
+            const collectionRef = collection(db, "cryptocurrencies");
+            const q = query(collectionRef, where("userId", "==", user.user.uid));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                setCryptos(
+                    querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id } as Crypto))
+                );
+                setDataChanged(prev => !prev); // Toggle the flag to trigger an update
+            });
+            return unsubscribe;
         } else {
-          setLoading(false);
+            setLoading(false);
         }
-      }, [user?.user.uid]);   
+    }, [user?.user.uid]);
       
       //Funkce pro získání aktuálni ceny krypta
       const getCurPrice = () => {
@@ -109,12 +111,12 @@ export const MainListComponent: React.FC = () => {
 
     
     //Získání aktuální ceny kryptoměny
-    useEffect(()=>{
-      if(cryptos){
-        getCurPrice();
-        setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
+    useEffect(() => {
+      if (cryptos && data) {
+          getCurPrice();
+          setHistoCryptoSum(cryptos.reduce((acc: number, crypto: { value: number; historical_price: number; }) => acc + crypto.value * crypto.historical_price, 0));
       }
-    },[data, cryptos]);    
+  }, [dataChanged]);   
 
     //Funkce pro spojení počtu vlastnených kryptoměn se stejným id, ale přidáné v jiný čas a její nastavení
     useEffect(() => {
