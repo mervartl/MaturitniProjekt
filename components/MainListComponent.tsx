@@ -202,7 +202,7 @@ export const MainListComponent: React.FC = () => {
                             <TableRow key={crypto.name}>
                                 <TableCell><img src={crypto.img} alt={crypto.name} width="30" /></TableCell>
                                 <TableCell>{crypto.name}</TableCell>
-                                <TableCell><NumericFormat value={parseFloat(crypto.value)} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
+                                <TableCell><NumericFormat value={parseFloat(parseFloat(crypto.value).toFixed(10))} displayType="text" thousandSeparator=" " decimalSeparator="," /> </TableCell>
                                 <TableCell><NumericFormat value={Math.round(crypto.current_price * 100) / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
                                 <TableCell><NumericFormat value={Math.round(crypto.value * crypto.current_price) * 100 / 100} displayType="text" thousandSeparator=" " decimalSeparator="," />  Kč</TableCell>
                                 <TableCell><Button onClick={() => onButtonClick(crypto.name)}>Detail</Button></TableCell>

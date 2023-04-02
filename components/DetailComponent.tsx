@@ -94,7 +94,7 @@ export const DetailComponent: React.FC<DetailComponentProps> = ({ setDtail, cNam
       }
     });
 
-    setSum(cryptos.reduce((acc, { value }) => acc + parseFloat(value), 0));
+    setSum(parseFloat(cryptos.reduce((acc, { value }) => acc + parseFloat(value), 0).toFixed(6)));
   }, [cryptos]);
 
 
